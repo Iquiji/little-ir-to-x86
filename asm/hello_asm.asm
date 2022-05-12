@@ -23,11 +23,11 @@ section .data
 msg: 
     db "Hello Assembler!", 0Ah, 0h
 fmtd_str:
-    db "%d", 0Ah, 0h
+    db "%lu", 0Ah, 0h
 fmtd_str_address:
-    db "address: %d", 0Ah, 0h
+    db "address: %lu", 0Ah, 0h
     
-static0_actual db 54321 ; Integer
+static0_actual dd 54321 ; Integer
 static0_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    1
@@ -75,9 +75,9 @@ main:
 
     ;
 
-    mov eax, static0_data_ptr_struc + data_ptr.mem
+    mov eax, [static0_data_ptr_struc + data_ptr.mem]
     mov eax, [eax]
-    mov eax, [eax]
+    ; mov eax, [eax]
     ; mov eax, [eax]
     ; mov eax, [eax]
 
