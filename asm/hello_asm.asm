@@ -70,7 +70,7 @@ main:
 
     pop eax
 
-    cmp eax,1600000
+    cmp eax,16000000
     jne .inc_loop
 
     ;
