@@ -70,7 +70,7 @@ main:
 
     pop eax
 
-    cmp eax,16
+    cmp eax,1600000
     jne .inc_loop
 
     ;
@@ -86,6 +86,8 @@ main:
     call printf
     add esp, 8 ; realign stack pointer?
 
+.loop
+    jmp .loop
 
     ;;  return 0
     mov eax, 0

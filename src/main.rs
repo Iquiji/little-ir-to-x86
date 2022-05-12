@@ -48,7 +48,7 @@ fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,
         little_intermediate_representation::StaticData::Bool(boolean) => {
             writeln!(
                 file,
-                "{}_actual db {} ; Boolean",
+                "{}_actual dd {} ; Boolean",
                 static_item.0,
                 if *boolean { "0x1" } else { "0x0" }
             )?;
@@ -64,7 +64,7 @@ iend\n
             )?;
         }
         little_intermediate_representation::StaticData::Integer(integer) => {
-            writeln!(file, "{}_actual db {} ; Integer", static_item.0, integer)?;
+            writeln!(file, "{}_actual dd {} ; Integer", static_item.0, integer)?;
             writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
             writeln!(
                 file,
@@ -77,7 +77,7 @@ iend\n
             )?;
         }
         little_intermediate_representation::StaticData::String(string) => {
-            writeln!(file, r#"{}_actual db "{}" ; String"#, static_item.0, string)?;
+            writeln!(file, r#"{}_actual db "{}",Oh ; String"#, static_item.0, string)?;
             writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
             writeln!(
                 file,
@@ -90,7 +90,7 @@ iend\n
             )?;
         },
         little_intermediate_representation::StaticData::Identifier(identifier) => {
-            writeln!(file, r#"{}_actual db "{}" ; Identifier"#, static_item.0, identifier)?;
+            writeln!(file, r#"{}_actual db "{}",0h ; Identifier"#, static_item.0, identifier)?;
             writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
             writeln!(
                 file,
