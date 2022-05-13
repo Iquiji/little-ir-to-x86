@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create("out/out.asm")?;
 
-    writeln!(&mut file,"%include includes.asm\n")?;
+    writeln!(&mut file,r#"%include "includes.asm""#)?;
 
     writeln!(&mut file,"section .data")?;
 
@@ -89,8 +89,8 @@ fn helper_write_actual_data_and_pointer(file: &mut File,name: &str,data_str: &st
     writeln!(
         file,
         "    istruc data_ptr
-        at .type, dd    {}
-        at .mem, dd     {}_actual
+        at data_ptr.type, dd    {}
+        at data_ptr.mem, dd     {}_actual
     iend\n
         ",
         type_num,

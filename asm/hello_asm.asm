@@ -11,7 +11,7 @@ endstruc
 struc scope_overlord
     .parent:     resd 1 ; parent scope ; if 0 there is none
     .scope_data: resd 1 ; pointer to scope_member list
-endstruc
+endstrucn
 
 struc scope_member
     .next:       resd 1 ; next scope member ; if 0 there is none
