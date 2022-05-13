@@ -39,6 +39,11 @@ global main
 extern printf, puts, malloc
 
 main:
+    ; init code to clean stack
+    push ebp
+    mov ebp, esp 
+
+    ;
     push msg
     call puts
     add esp, 8
@@ -70,7 +75,7 @@ main:
 
     pop eax
 
-    cmp eax,16000000
+    cmp eax,16
     jne .inc_loop
 
     ;
@@ -86,8 +91,8 @@ main:
     call printf
     add esp, 8 ; realign stack pointer?
 
-.loop
-    jmp .loop
+    ; fix ebp from stack
+    pop ebp
 
     ;;  return 0
     mov eax, 0

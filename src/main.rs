@@ -5,6 +5,10 @@ use little_intermediate_representation::{Translator, StaticData};
 use little_parser::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+
+    // name in global scope and name in actulal asm
+    let primitives: Vec<(String,String)> = vec![];
+
     println!("Hello, world!");
 
     let mut parser = Parser::init_with_string(r#"('5)"#);
@@ -23,20 +27,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3 - Identifier -> Ptr
     // 4 - String -> Ptr
     // 5 - List -> Ptr to LinkedList
-    // 6 -
+    // 6 - Function -> Ptr InitialisedFuncitonPointer
     // 7 -
     // 8 -
     // 9 -
 
     let mut file = File::create("out/out.asm")?;
 
+    writeln!(&mut file,"%include includes.asm\n")?;
+
     writeln!(&mut file,"section .data")?;
 
     for static_item in translator.static_data.iter() {
         static_data_convert_to_handles_in_file(&mut file, static_item)?;
     }
+    for primitive in primitives.iter().enumerate().rev(){
+        // generate global scope:
+        // iterative linked list for the start
+        // One overlord node for each because each needs its own node
+        // but we must put all the primitives together into one as well for the global scope
 
-    writeln!(&mut file,"\n\nsection .text")?;
+    }
+
+    writeln!(&mut file,"\nsection .text")?;
 
     Ok(())
 }
@@ -46,61 +59,19 @@ fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,
 
     match static_item.1 {
         little_intermediate_representation::StaticData::Bool(boolean) => {
-            writeln!(
-                file,
-                "{}_actual dd {} ; Boolean",
-                static_item.0,
-                if *boolean { "0x1" } else { "0x0" }
-            )?;
-            writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
-            writeln!(
-                file,
-                "   istruc data_ptr
-    at .type, dd    2
-    at .mem, dd     {}_actual
-iend\n
-                ",
-                static_item.0
-            )?;
+            helper_write_actual_data_and_pointer(file,static_item.0,if *boolean { "1" } else { "0" },"db",2)?;
+
         }
         little_intermediate_representation::StaticData::Integer(integer) => {
-            writeln!(file, "{}_actual dd {} ; Integer", static_item.0, integer)?;
-            writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
-            writeln!(
-                file,
-                "    istruc data_ptr
-    at .type, dd    1
-    at .mem, dd     {}_actual
-iend\n
-                ",
-                static_item.0
-            )?;
+            helper_write_actual_data_and_pointer(file,static_item.0,&integer.to_string(),"dd",1)?;
+
         }
         little_intermediate_representation::StaticData::String(string) => {
-            writeln!(file, r#"{}_actual db "{}",Oh ; String"#, static_item.0, string)?;
-            writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
-            writeln!(
-                file,
-                "    istruc data_ptr
-    at .type, dd    4
-    at .mem, dd     {}_actual
-iend\n
-                ",
-                static_item.0
-            )?;
+            helper_write_actual_data_and_pointer(file,static_item.0,string,"db",4)?;
+
         },
         little_intermediate_representation::StaticData::Identifier(identifier) => {
-            writeln!(file, r#"{}_actual db "{}",0h ; Identifier"#, static_item.0, identifier)?;
-            writeln!(file, "{}_data_ptr_struc:", static_item.0,)?;
-            writeln!(
-                file,
-                "    istruc data_ptr
-    at .type, dd    3
-    at .mem, dd     {}_actual
-iend\n
-                ",
-                static_item.0
-            )?;
+            helper_write_actual_data_and_pointer(file,static_item.0,identifier,"db",3)?;
         },
         little_intermediate_representation::StaticData::List(_list) => {
             
@@ -108,6 +79,23 @@ iend\n
 
         },
     }
+
+    Ok(())
+}
+
+fn helper_write_actual_data_and_pointer(file: &mut File,name: &str,data_str: &str,db_or_dd: &str,type_num: u32,) -> Result<(),Box<dyn std::error::Error>>{
+    writeln!(file, r#"{}_actual {} {}{}{} ; Autogen"#, name,db_or_dd,if db_or_dd == "db"{r#"""#}else{""}, data_str,if db_or_dd == "db"{r#"",0h"#}else{""})?;
+    writeln!(file, "{}_data_ptr_struc:", name,)?;
+    writeln!(
+        file,
+        "    istruc data_ptr
+        at .type, dd    {}
+        at .mem, dd     {}_actual
+    iend\n
+        ",
+        type_num,
+        name
+    )?;
 
     Ok(())
 }
