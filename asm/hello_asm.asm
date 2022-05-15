@@ -155,6 +155,7 @@ main:
     push str_2
     call string_cmp
 
+    push eax
     push dword fmtd_str_address
     call printf
     add esp, 8
@@ -194,22 +195,13 @@ string_cmp:
     jmp .cmp_loop            ; if this line is reached, the password was correct
 .if_equal: ; if equal return that 
     
-    push 42
-    push dword fmtd_str_success
-    call printf
-    add esp, 8
-    
-    leave
-    push 1
+    mov  esp,ebp        ; standard function return stuff - we
+    pop  ebp            ; have to restore %ebp and %esp to where
+    mov eax, 1
     ret
 
 .if_unequal: ; if not go to next
     
-    push 7
-    push dword fmtd_str_success
-    call printf
-    add esp, 8
-    
     leave
-    push 0
+    mov eax,0
     ret
