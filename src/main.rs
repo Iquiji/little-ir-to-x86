@@ -7,11 +7,11 @@ use little_parser::Parser;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // name in global scope and name in actulal asm
-    let primitives: Vec<(String,String)> = vec![];
+    let primitives: Vec<String> = vec!["car".to_owned(),"cdr".to_owned(),"cons".to_owned(),"display".to_owned()];
 
     println!("Hello, world!");
 
-    let mut parser = Parser::init_with_string(r#"('5)"#);
+    let mut parser = Parser::init_with_string(r#"(display '5)"#);
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
@@ -41,12 +41,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for static_item in translator.static_data.iter() {
         static_data_convert_to_handles_in_file(&mut file, static_item)?;
     }
-    for primitive in primitives.iter().enumerate().rev(){
+
+    // write global scope head:
+
+    writeln!(&mut file,"global_scope:
+    istruc scope_overlord
+        at scope_overlord.parent, dd 0 ; global scope doesnt have parents!
+        at scope_overlord.scope_data, dd global_scope_data_ll_0
+    iend")?;
+    writeln!(&mut file,"current_scope dd global_scope")?;
+
+    for primitive in primitives.iter().enumerate(){
         // generate global scope:
         // iterative linked list for the start
         // One overlord node for each because each needs its own node
         // but we must put all the primitives together into one as well for the global scope
+        writeln!(&mut file,"\nprimitive_{}_init_func_ptr_struc:
+        istruc init_func_pointer
+            at init_func_pointer.actual_func_ptr, dd primitive_{}_asm_actual ; actual pointer
+            at init_func_pointer.scope, dd primitive_{}_init_scope ; ptr to scope
+        iend
+primitive_{}_init_scope:
+        istruc scope_overlord
+            at scope_overlord.parent, dd global_scope
+            at scope_overlord.scope_data, dd 0 ; uninitialized
+        iend
+    
+primitive_{}_global_scope_string_ident:
+        db \"{}\", 0h",primitive.1,primitive.1,primitive.1,primitive.1,primitive.1,primitive.1)?;
 
+        writeln!(&mut file,"global_scope_data_ll_{}:
+        istruc scope_member
+            at scope_member.next, dd {} ; none if last
+            at scope_member.identifier, dd primitive_{}_global_scope_string_ident ; ptr to string ident
+            at scope_member.data, dd primitive_{}_init_func_ptr_struc ; ptr to function
+        iend",primitive.0,if primitive.0 == primitives.len()-1{"0".to_owned()}else{"global_scope_data_ll_".to_owned() + &(primitive.0 + 1).to_string()},primitive.1,primitive.1)?;
     }
 
     writeln!(&mut file,"\nsection .text")?;

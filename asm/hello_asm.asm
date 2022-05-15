@@ -11,7 +11,7 @@ endstruc
 struc scope_overlord
     .parent:     resd 1 ; parent scope ; if 0 there is none
     .scope_data: resd 1 ; pointer to scope_member list
-endstrucn
+endstruc
 
 struc scope_member
     .next:       resd 1 ; next scope member ; if 0 there is none
@@ -26,7 +26,13 @@ fmtd_str:
     db "%lu", 0Ah, 0h
 fmtd_str_address:
     db "address: %lu", 0Ah, 0h
-    
+fmtd_str_success:
+    db "success: %lu", 0Ah, 0h 
+fmtd_str_compare:
+    db "comparing: '%s' & '%s'", 0Ah, 0h 
+str_1: db "trol1222ABF" , 0h
+str_2: db "trol1222ABF" , 0h
+
 static0_actual dd 54321 ; Integer
 static0_data_ptr_struc:
     istruc data_ptr
@@ -91,9 +97,119 @@ main:
     call printf
     add esp, 8 ; realign stack pointer?
 
+    ; string comparision:
+    mov ecx, 0            ; index and loop counter
+.loop:  
+    push ecx
+    push ecx
+    
+    push ecx ; print counter
+    push dword fmtd_str
+    call printf
+    add esp, 8
+
+    pop ecx
+
+    ; print comparision
+    mov eax, str_1
+    add eax, ecx
+    push eax
+
+    mov eax, str_2
+    add eax, ecx
+    push eax
+
+    push dword fmtd_str_compare
+    call printf
+    add esp, 12
+
+    ; compare
+    pop ecx
+
+    mov eax, 0
+    mov ebx, 0  
+    mov al, [str_1+ecx]   ; load a character from passwd
+    mov bl, [str_2+ecx]   ; is it equal to the same character in the input?
+    cmp al,bl
+    jne .unequal          ; if not, the password is incorrect
+    inc ecx               ; advance index
+    cmp al, 0             ; reached the end of the string?
+    je .equal             ; loop until we do
+    jmp .loop            ; if this line is reached, the password was correct
+
+.unequal: ; if this line is reached, the password was wrong
+    push 0
+    push dword fmtd_str_success
+    call printf
+    add esp, 8
+    jmp .exit
+.equal: ; jump to correct_func if they are equal
+    push 1
+    push dword fmtd_str_success
+    call printf
+    add esp, 8
+    jmp .exit
+.exit:
+
+    push str_1
+    push str_2
+    call string_cmp
+
+    push dword fmtd_str_address
+    call printf
+    add esp, 8
+
     ; fix ebp from stack
     pop ebp
 
     ;;  return 0
     mov eax, 0
+    ret
+
+
+string_cmp:
+    push ebp
+    mov ebp, esp
+
+    mov esi, [ebp+12]
+    mov edi, [ebp+8]
+
+    push esi
+    push edi
+    push dword fmtd_str_compare
+    call printf
+    add esp, 8
+
+    mov ecx, 0            ; index and loop counter
+.cmp_loop:
+    mov al, 0
+    mov bl, 0  
+    mov al, [esi+ecx]   ; load a character from passwd
+    mov bl, [edi+ecx]   ; is it equal to the same character in the input?
+    cmp al,bl
+    jne .if_unequal          ; if not, the password is incorrect
+    inc ecx               ; advance index
+    cmp al, 0             ; reached the end of the string?
+    je .if_equal             ; loop until we do
+    jmp .cmp_loop            ; if this line is reached, the password was correct
+.if_equal: ; if equal return that 
+    
+    push 42
+    push dword fmtd_str_success
+    call printf
+    add esp, 8
+    
+    leave
+    push 1
+    ret
+
+.if_unequal: ; if not go to next
+    
+    push 7
+    push dword fmtd_str_success
+    call printf
+    add esp, 8
+    
+    leave
+    push 0
     ret
