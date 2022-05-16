@@ -107,7 +107,9 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
         little_intermediate_representation::LinearInstruction::AcceptToFormals { static_formals_list } => todo!(),
         little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => todo!(),
         little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => todo!(),
-        little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => todo!(),
+        little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => {
+            writeln!(file,"    mov [{}],{}_data_ptr_struc",to_reg.virtual_ident,static_ref.refname)?;
+        },
         little_intermediate_representation::LinearInstruction::PushToStack { register } => {
             writeln!(file,"    push [{}] ; LinearInstruction::PushToStack\n",register.virtual_ident)?;
         },
