@@ -1,26 +1,5 @@
 %include "../helper_functions.asm"
-
-struc linked_list_node
-    .next:   resd 1 ; Pointer ; if 0 there is none
-    .data:   resd 1 ; Pointer to data_ptr
-endstruc
-
-struc data_ptr
-    .type:   resd 1 ; type annotation number
-    .mem:    resd 1 ; Pointer to actual data
-endstruc
-
-struc scope_overlord
-    .parent:     resd 1 ; parent scope ; if 0 there is none
-    .scope_data: resd 1 ; pointer to scope_member list
-endstruc
-
-struc scope_member
-    .next:       resd 1 ; next scope member ; if 0 there is none
-    .identifier: resd 1 ; pointer to string corresponding to this entry
-    .data:       resd 1 ; data if the identifier is the right one
-endstruc
-
+%include "../includes.asm"
 section .data
 msg: 
     db "Hello Assembler!", 0Ah, 0h
@@ -35,6 +14,8 @@ fmtd_str_compare:
 str_1: db "trol1222ABF" , 0h
 str_2: db "trol1222ABF" , 0h
 
+str_to_search_for_in_scope: db "display", 0h
+
 static0_actual dd 54321 ; Integer
 static0_data_ptr_struc:
     istruc data_ptr
@@ -42,6 +23,92 @@ static0_data_ptr_struc:
         at data_ptr.mem, dd     static0_actual
     iend
 section .text
+
+global_scope:
+    istruc scope_overlord
+        at scope_overlord.parent, dd 0 ; global scope doesnt have parents!
+        at scope_overlord.scope_data, dd global_scope_data_ll_0
+    iend
+current_scope dd global_scope
+
+primitive_car_init_func_ptr_struc:
+        istruc init_func_pointer
+            at init_func_pointer.actual_func_ptr, dd primitive_car_asm_actual ; actual pointer
+            at init_func_pointer.scope, dd primitive_car_init_scope ; ptr to scope
+        iend
+primitive_car_init_scope:
+        istruc scope_overlord
+            at scope_overlord.parent, dd global_scope
+            at scope_overlord.scope_data, dd 0 ; uninitialized
+        iend
+    
+primitive_car_global_scope_string_ident:
+        db "car", 0h
+global_scope_data_ll_0:
+    istruc scope_member
+        at scope_member.next, dd global_scope_data_ll_1 ; none if last
+        at scope_member.identifier, dd primitive_car_global_scope_string_ident ; ptr to string ident
+        at scope_member.data, dd primitive_car_init_func_ptr_struc ; ptr to function
+    iend
+
+primitive_cdr_init_func_ptr_struc:
+    istruc init_func_pointer
+        at init_func_pointer.actual_func_ptr, dd primitive_cdr_asm_actual ; actual pointer
+        at init_func_pointer.scope, dd primitive_cdr_init_scope ; ptr to scope
+    iend
+primitive_cdr_init_scope:
+        istruc scope_overlord
+            at scope_overlord.parent, dd global_scope
+            at scope_overlord.scope_data, dd 0 ; uninitialized
+        iend
+    
+primitive_cdr_global_scope_string_ident: db "cdr", 0h
+global_scope_data_ll_1:
+        istruc scope_member
+            at scope_member.next, dd global_scope_data_ll_2 ; none if last
+            at scope_member.identifier, dd primitive_cdr_global_scope_string_ident ; ptr to string ident
+            at scope_member.data, dd primitive_cdr_init_func_ptr_struc ; ptr to function
+        iend
+
+primitive_cons_init_func_ptr_struc:
+        istruc init_func_pointer
+            at init_func_pointer.actual_func_ptr, dd primitive_cons_asm_actual ; actual pointer
+            at init_func_pointer.scope, dd primitive_cons_init_scope ; ptr to scope
+        iend
+primitive_cons_init_scope:
+        istruc scope_overlord
+            at scope_overlord.parent, dd global_scope
+            at scope_overlord.scope_data, dd 0 ; uninitialized
+        iend
+    
+primitive_cons_global_scope_string_ident:
+        db "cons", 0h
+global_scope_data_ll_2:
+        istruc scope_member
+            at scope_member.next, dd global_scope_data_ll_3 ; none if last
+            at scope_member.identifier, dd primitive_cons_global_scope_string_ident ; ptr to string ident
+            at scope_member.data, dd primitive_cons_init_func_ptr_struc ; ptr to function
+        iend
+
+primitive_display_init_func_ptr_struc:
+        istruc init_func_pointer
+            at init_func_pointer.actual_func_ptr, dd primitive_display_asm_actual ; actual pointer
+            at init_func_pointer.scope, dd primitive_display_init_scope ; ptr to scope
+        iend
+primitive_display_init_scope:
+        istruc scope_overlord
+            at scope_overlord.parent, dd global_scope
+            at scope_overlord.scope_data, dd 0 ; uninitialized
+        iend
+    
+primitive_display_global_scope_string_ident:
+        db "display", 0h
+global_scope_data_ll_3:
+        istruc scope_member
+            at scope_member.next, dd 0 ; none if last
+            at scope_member.identifier, dd primitive_display_global_scope_string_ident ; ptr to string ident
+            at scope_member.data, dd primitive_display_init_func_ptr_struc ; ptr to function
+        iend
 
 global main
 extern printf, puts, malloc
@@ -99,60 +166,6 @@ main:
     call printf
     add esp, 8 ; realign stack pointer?
 
-    ; string comparision:
-    mov ecx, 0            ; index and loop counter
-.loop:  
-    push ecx
-    push ecx
-    
-    push ecx ; print counter
-    push dword fmtd_str
-    call printf
-    add esp, 8
-
-    pop ecx
-
-    ; print comparision
-    mov eax, str_1
-    add eax, ecx
-    push eax
-
-    mov eax, str_2
-    add eax, ecx
-    push eax
-
-    push dword fmtd_str_compare
-    call printf
-    add esp, 12
-
-    ; compare
-    pop ecx
-
-    mov eax, 0
-    mov ebx, 0  
-    mov al, [str_1+ecx]   ; load a character from passwd
-    mov bl, [str_2+ecx]   ; is it equal to the same character in the input?
-    cmp al,bl
-    jne .unequal          ; if not, the password is incorrect
-    inc ecx               ; advance index
-    cmp al, 0             ; reached the end of the string?
-    je .equal             ; loop until we do
-    jmp .loop            ; if this line is reached, the password was correct
-
-.unequal: ; if this line is reached, the password was wrong
-    push 0
-    push dword fmtd_str_success
-    call printf
-    add esp, 8
-    jmp .exit
-.equal: ; jump to correct_func if they are equal
-    push 1
-    push dword fmtd_str_success
-    call printf
-    add esp, 8
-    jmp .exit
-.exit:
-
     push dword 0
     push str_1
     push str_2
@@ -163,9 +176,35 @@ main:
     call printf
     add esp, 8
 
+    ; search in scope
+
+    push primitive_display_asm_actual
+    push dword fmtd_str_address
+    call printf
+    add esp, 8
+
+    push dword 0
+    push str_to_search_for_in_scope
+    push global_scope
+    call lookup_in_scope_and_parents
+    add esp, 8
+
+    push dword fmtd_str_address
+    call printf
+    add esp, 8
+
     ; fix ebp from stack
     pop ebp
 
     ;;  return 0
     mov eax, 0
     ret
+
+primitive_car_asm_actual:
+    nop
+primitive_cdr_asm_actual:
+    nop
+primitive_cons_asm_actual:
+    nop
+primitive_display_asm_actual:
+    nop

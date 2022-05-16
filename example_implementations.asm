@@ -1,6 +1,7 @@
 ; GLOBAL SCOPE: 
 %include "include.asm"
 %include "helper_functions.asm"
+section .data
 ; stubs for function pointer scopes for global scopes
 primitive_car_init_func_ptr_struc:
     istruc init_func_pointer
@@ -44,7 +45,7 @@ primitive_car_asm_actual:
 
 lookup_in_scope_and_parents:
     ; takes ptr to ident string to search for in as arg
-    ; and takes scope overlord for which to search in and search up in as argument
+    ; and takes scop51063e overlord for which to search in and search up in as argument
     ; ebp-8 -> scope_overlord* ebp-12 -> search_str* ; ebp-16 result here
     push ebp
     mov ebp, esp
@@ -59,8 +60,28 @@ lookup_in_scope_and_parents:
     je .next_overlord
     ; this overlord member not nonexistent
     mov ebx, [eax + scope_overlord.scope_data] ; ebx holds current scope_member in linked list
+    push ebx
 
+    push [ebp-12]
+    push [ebx + scope_member.identifier]
+    call string_cmp
 
+    pop ecx ; result from string cmp
+    pop ebx ; retain current scope member
+
+    cmp ecx, 1 ; if equal strings
+    je .found_result
+
+    ; not equal go to next
+    cmp [ebx+scope_member.next],0
+    je .next_overlord
+    ; next member exists:
+    mov ebx, [ebx+scope_member.next]
+    jmp .compare_in_overlord_start
+
+.found_result:
+    mov [ebp-16],[ebx + scope_member.data]
+    jmp .return
 
 .next_overlord:
     pop eax

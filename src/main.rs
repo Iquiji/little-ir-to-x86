@@ -79,6 +79,9 @@ primitive_{}_global_scope_string_ident:
     }
 
     writeln!(&mut file,"\nsection .text")?;
+    writeln!(&mut file,"extern printf,malloc")?;
+    writeln!(&mut file,"global main")?;
+    writeln!(&mut file,"\nmain:")?;
 
     Ok(())
 }
