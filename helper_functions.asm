@@ -1,5 +1,6 @@
 %include "../includes.asm"
 section .data
+init_msg_in_lookup: db "init lookup",0h
 fmtd_str_compare:
     db "comparing: '%s' & '%s'", 0Ah, 0h 
 section .text
@@ -12,11 +13,18 @@ string_cmp:
     mov esi, [ebp+12]
     mov edi, [ebp+8]
 
+    push esi 
+    push edi
+
     push esi
     push edi
     push dword fmtd_str_compare
     call printf
     add esp, 8
+
+    pop edi 
+    pop esi
+
 
     mov ecx, 0            ; index and loop counter
 .cmp_loop:
@@ -58,14 +66,17 @@ lookup_in_scope_and_parents:
     mov eax, dword[ebp+8]
     push eax
     
+    push ebx
+    push eax
+    push init_msg_in_lookup
+    call puts
+    add esp, 4
+    pop eax
+    pop eax
+
+
     mov esi, dword[eax + scope_overlord.scope_data]
 
-    ; push eax
-    ; ; push esi
-    ; push dword msg
-    ; call dword printf
-    ; add esp, 4
-    
     ; pop eax
     
     jmp .compare_in_overlord_start 

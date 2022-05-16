@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 8 -
     // 9 -
 
-    let mut file = File::create("out/out.asm")?;
+    let mut file = File::create("out/gen.asm")?;
 
     writeln!(&mut file,r#"%include "../includes.asm""#)?;
     writeln!(&mut file,r#"%include "../helper_functions.asm""#)?;
@@ -126,7 +126,7 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
     call lookup_in_scope_and_parents
     add esp, 8
     pop esi
-    mov [{}],esi\n",identifier.refname,match scope{
+    mov dword[{}],esi\n",identifier.refname,match scope{
     little_intermediate_representation::Scope::Global => "global_scope",
     little_intermediate_representation::Scope::Current => "current_scope",
     little_intermediate_representation::Scope::Custom(_) => todo!(),
