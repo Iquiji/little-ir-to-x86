@@ -151,12 +151,13 @@ main:
     jmp .exit
 .exit:
 
+    push dword 0
     push str_1
     push str_2
     call string_cmp
+    add esp,8
 
-    push eax
-    push dword fmtd_str_address
+    push dword fmtd_str_success
     call printf
     add esp, 8
 
@@ -195,13 +196,14 @@ string_cmp:
     jmp .cmp_loop            ; if this line is reached, the password was correct
 .if_equal: ; if equal return that 
     
+    mov [ebp+16], dword 1
     mov  esp,ebp        ; standard function return stuff - we
     pop  ebp            ; have to restore %ebp and %esp to where
-    mov eax, 1
     ret
 
 .if_unequal: ; if not go to next
     
-    leave
-    mov eax,0
+    mov [ebp+16], dword 0
+    mov  esp,ebp        ; standard function return stuff - we
+    pop  ebp            ; have to restore %ebp and %esp to where
     ret
