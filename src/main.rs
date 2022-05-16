@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 
-use little_intermediate_representation::{Translator, StaticData};
+use little_intermediate_representation::{Translator, StaticData, LinearBlock};
 use little_parser::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -35,6 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::create("out/out.asm")?;
 
     writeln!(&mut file,r#"%include "includes.asm""#)?;
+    writeln!(&mut file,r#"%include "helper_functions.asm""#)?;
 
     writeln!(&mut file,"section .data")?;
 
@@ -83,8 +84,38 @@ primitive_{}_global_scope_string_ident:
     writeln!(&mut file,"global main")?;
     writeln!(&mut file,"\nmain:")?;
 
+    let main_block = translator.lambda_map.get("main").ok_or("err")?;
+        
+    if let LinearBlock { ident, program } = main_block {
+        for instruction in program{
+            ir_instruction_generate_code_in_file(&mut file, instruction.clone())?;
+        }
+    }
+
     Ok(())
 }
+fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_intermediate_representation::LinearInstruction) -> Result<(),Box<dyn std::error::Error>>{
+    
+    match ir_instruction{
+        little_intermediate_representation::LinearInstruction::AcceptToFormals { static_formals_list } => todo!(),
+        little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => todo!(),
+        little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => todo!(),
+        little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => todo!(),
+        little_intermediate_representation::LinearInstruction::PushToStack { register } => todo!(),
+        little_intermediate_representation::LinearInstruction::PopFromStack { register } => todo!(),
+        little_intermediate_representation::LinearInstruction::LinkedListInit { output_reg } => todo!(),
+        little_intermediate_representation::LinearInstruction::LinkedListAdd { linked_list_reg, input_reg } => todo!(),
+        little_intermediate_representation::LinearInstruction::Assign { identifier, from_reg, scope } => todo!(),
+        little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments } => todo!(),
+        little_intermediate_representation::LinearInstruction::Lookup { identifier, to_reg, scope } => todo!(),
+        little_intermediate_representation::LinearInstruction::Cond { condition, branc_if_true } => todo!(),
+        little_intermediate_representation::LinearInstruction::Return { value } => todo!(),
+        little_intermediate_representation::LinearInstruction::InitializeFunctionPointer { function, from_scope, outpu_reg } => todo!(),
+    }
+
+    Ok(())
+}
+
 
 fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,&StaticData)) -> Result<(),Box<dyn std::error::Error>>{
     println!("static data item: {:#?}", static_item);
