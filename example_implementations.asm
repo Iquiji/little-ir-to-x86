@@ -1,5 +1,6 @@
 ; GLOBAL SCOPE: 
 %include "include.asm"
+%include "helper_functions.asm"
 ; stubs for function pointer scopes for global scopes
 primitive_car_init_func_ptr_struc:
     istruc init_func_pointer
@@ -40,37 +41,11 @@ primitive_car_asm_actual:
 
 ; lookup blueprint: WIP
 ; string comparision:
-string_cmp:
-    push ebp
-    mov ebp, esp
-
-    mov esi, [ebp-12]
-    mov edi, [ebp-8]
-
-    mov ecx, 0            ; index and loop counter
-.cmp_loop:
-    mov eax, 0
-    mov ebx, 0  
-    mov al, [esi+ecx]   ; load a character from passwd
-    mov bl, [edi+ecx]   ; is it equal to the same character in the input?
-    cmp al,bl
-    jne .if_unequal          ; if not, the password is incorrect
-    inc ecx               ; advance index
-    cmp al, 0             ; reached the end of the string?
-    je .if_equal             ; loop until we do
-    jmp .cmp_loop            ; if this line is reached, the password was correct
-.if_equal: ; if equal return that 
-    push 1
-    ret
-
-.if_unequal: ; if not go to next
-    push 0
-    ret
 
 lookup_in_scope_and_parents:
     ; takes ptr to ident string to search for in as arg
     ; and takes scope overlord for which to search in and search up in as argument
-    ; ebp-8 -> scope_overlord* ebp-12 -> search_str*
+    ; ebp-8 -> scope_overlord* ebp-12 -> search_str* ; ebp-16 result here
     push ebp
     mov ebp, esp
 

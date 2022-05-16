@@ -1,3 +1,5 @@
+%include "../helper_functions.asm"
+
 struc linked_list_node
     .next:   resd 1 ; Pointer ; if 0 there is none
     .data:   resd 1 ; Pointer to data_ptr
@@ -166,46 +168,4 @@ main:
 
     ;;  return 0
     mov eax, 0
-    ret
-
-
-string_cmp: 
-    ; compares 2 strings ; first arg result ; second and third: first and second string respectevly
-    ; returns 1 in first arg for true and 0 for false
-    push ebp
-    mov ebp, esp
-
-    mov esi, [ebp+12]
-    mov edi, [ebp+8]
-
-    push esi
-    push edi
-    push dword fmtd_str_compare
-    call printf
-    add esp, 8
-
-    mov ecx, 0            ; index and loop counter
-.cmp_loop:
-    mov al, 0
-    mov bl, 0  
-    mov al, [esi+ecx]   ; load a character from passwd
-    mov bl, [edi+ecx]   ; is it equal to the same character in the input?
-    cmp al,bl
-    jne .if_unequal          ; if not, the password is incorrect
-    inc ecx               ; advance index
-    cmp al, 0             ; reached the end of the string?
-    je .if_equal             ; loop until we do
-    jmp .cmp_loop            ; if this line is reached, the password was correct
-.if_equal: ; if equal return that 
-    
-    mov [ebp+16], dword 1
-    mov  esp,ebp        ; standard function return stuff - we
-    pop  ebp            ; have to restore %ebp and %esp to where
-    ret
-
-.if_unequal: ; if not go to next
-    
-    mov [ebp+16], dword 0
-    mov  esp,ebp        ; standard function return stuff - we
-    pop  ebp            ; have to restore %ebp and %esp to where
     ret
