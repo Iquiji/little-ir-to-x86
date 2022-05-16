@@ -9,8 +9,6 @@ fmtd_str_address:
     db "address: %lu", 0Ah, 0h
 fmtd_str_success:
     db "success: %lu", 0Ah, 0h 
-fmtd_str_compare:
-    db "comparing: '%s' & '%s'", 0Ah, 0h 
 str_1: db "trol1222ABF" , 0h
 str_2: db "trol1222ABF" , 0h
 

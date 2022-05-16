@@ -34,8 +34,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create("out/out.asm")?;
 
-    writeln!(&mut file,r#"%include "includes.asm""#)?;
-    writeln!(&mut file,r#"%include "helper_functions.asm""#)?;
+    writeln!(&mut file,r#"%include "../includes.asm""#)?;
+    writeln!(&mut file,r#"%include "../helper_functions.asm""#)?;
 
     writeln!(&mut file,"section .data")?;
 
@@ -79,6 +79,13 @@ primitive_{}_global_scope_string_ident:
         iend",primitive.0,if primitive.0 == primitives.len()-1{"0".to_owned()}else{"global_scope_data_ll_".to_owned() + &(primitive.0 + 1).to_string()},primitive.1,primitive.1)?;
     }
 
+    
+
+    writeln!(&mut file,"\nsection .bss")?;
+    for reg in 0..=translator.register_counter{
+        writeln!(&mut file,"{}: resd 1","vreg".to_owned() + &reg.to_string())?;
+    }
+    
     writeln!(&mut file,"\nsection .text")?;
     writeln!(&mut file,"extern printf,malloc")?;
     writeln!(&mut file,"global main")?;
@@ -101,13 +108,31 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
         little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => todo!(),
         little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => todo!(),
         little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => todo!(),
-        little_intermediate_representation::LinearInstruction::PushToStack { register } => todo!(),
-        little_intermediate_representation::LinearInstruction::PopFromStack { register } => todo!(),
+        little_intermediate_representation::LinearInstruction::PushToStack { register } => {
+            writeln!(file,"    push [{}] ; LinearInstruction::PushToStack\n",register.virtual_ident)?;
+        },
+        little_intermediate_representation::LinearInstruction::PopFromStack { register } => {
+            writeln!(file,"    pop esi ; LinearInstruction::PopFromStack
+    mov [{}],esi",register.virtual_ident)?;
+        },
         little_intermediate_representation::LinearInstruction::LinkedListInit { output_reg } => todo!(),
         little_intermediate_representation::LinearInstruction::LinkedListAdd { linked_list_reg, input_reg } => todo!(),
         little_intermediate_representation::LinearInstruction::Assign { identifier, from_reg, scope } => todo!(),
         little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments } => todo!(),
-        little_intermediate_representation::LinearInstruction::Lookup { identifier, to_reg, scope } => todo!(),
+        little_intermediate_representation::LinearInstruction::Lookup { identifier, to_reg, scope } => {
+            writeln!(file,"    push dword 0 ; LinearInstruction::Lookup
+    push {}_actual
+    push {}
+    call lookup_in_scope_and_parents
+    add esp, 8
+    pop esi
+    mov [{}],esi\n",identifier.refname,match scope{
+    little_intermediate_representation::Scope::Global => "global_scope",
+    little_intermediate_representation::Scope::Current => "current_scope",
+    little_intermediate_representation::Scope::Custom(_) => todo!(),
+},to_reg.virtual_ident)?;
+
+        },
         little_intermediate_representation::LinearInstruction::Cond { condition, branc_if_true } => todo!(),
         little_intermediate_representation::LinearInstruction::Return { value } => todo!(),
         little_intermediate_representation::LinearInstruction::InitializeFunctionPointer { function, from_scope, outpu_reg } => todo!(),

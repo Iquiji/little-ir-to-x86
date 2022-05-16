@@ -1,4 +1,8 @@
 %include "../includes.asm"
+section .data
+fmtd_str_compare:
+    db "comparing: '%s' & '%s'", 0Ah, 0h 
+section .text
 string_cmp: 
     ; compares 2 strings ; first arg result ; second and third: first and second string respectevly
     ; returns 1 in first arg for true and 0 for false

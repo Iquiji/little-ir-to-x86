@@ -1,3 +1,4 @@
 /target
 Cargo.lock
-out/
+out/out.o
+out/out.out
