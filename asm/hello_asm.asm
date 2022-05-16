@@ -169,7 +169,9 @@ main:
     ret
 
 
-string_cmp:
+string_cmp: 
+    ; compares 2 strings ; first arg result ; second and third: first and second string respectevly
+    ; returns 1 in first arg for true and 0 for false
     push ebp
     mov ebp, esp
 
