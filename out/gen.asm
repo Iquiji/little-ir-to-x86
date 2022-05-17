@@ -120,6 +120,9 @@ extern printf,malloc
 global main
 
 main:
+    push ebp ; hello there
+    mov ebp,esp
+
     push dword 0 ; LinearInstruction::Lookup
     push static0_actual
     push current_scope
@@ -130,3 +133,53 @@ main:
 
     push [vreg0] ; LinearInstruction::PushToStack
 
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg1],esi
+
+    push [vreg1] ; LinearInstruction::PushToStack
+
+    mov [vreg2],static1_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+
+    push [vreg2] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg3],esi
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg4],esi
+
+    mov esi, dword[vreg4] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg3] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
+
+    push [vreg4] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg5],esi
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg6],esi
+
+    mov esi,[vreg6] ; LinearInstruction::Call
+    mov edi,[vreg5]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [vreg7],esi
+
+    push [vreg5] ; LinearInstruction::PushToStack
+
+   leave ; bye
+    ret

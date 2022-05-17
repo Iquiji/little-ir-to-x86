@@ -150,16 +150,17 @@ main:
     call printf
     add esp, 8
 
-    push dword 190
+    push dword 0
     call dword init_linked_list
     pop eax
 
+    push eax
     push eax
 
     push eax
     push dword 42
     call add_to_linked_list
-    add esp,12
+    add esp,8
 
     pop eax
     push eax
@@ -167,7 +168,7 @@ main:
     push eax
     push dword 187
     call add_to_linked_list
-    add esp,12
+    add esp,8
 
     pop eax
     push eax
@@ -175,13 +176,15 @@ main:
     push eax
     push dword 4
     call add_to_linked_list
-    
-    add esp, 12    
+    add esp, 8  
+
     pop eax
 .loop_linked_list:
     push eax
     
-    push dword [eax+linked_list_node.data]
+    mov edx, dword [eax+linked_list_node.data]
+
+    push dword edx
     push dword fmtd_str_out
     call printf
     add esp, 8
@@ -200,18 +203,24 @@ main:
     call printf
     add esp, 8
 
+    ; call display_actual with our calling convention
+    ; little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments }
+    ; gotta clone the scope in function_pointer :O pain?
+    pop eax
+    
+    push __empty_to_output_to ; output here
+    push eax
+    push primitive_display_init_func_ptr_struc
+    call auxilary_call_function
+    add esp,8
+
+    push fmtd_str_out
+    call printf
+    add esp, 8
+
     push dword bye_msg
     call puts
     add esp,4
 
     leave
     ret
-
-
-primitive_car_asm_actual:
-
-primitive_display_asm_actual:
-
-primitive_cons_asm_actual:
-
-primitive_cdr_asm_actual:

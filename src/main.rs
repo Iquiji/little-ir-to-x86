@@ -94,9 +94,14 @@ primitive_{}_global_scope_string_ident:
     let main_block = translator.lambda_map.get("main").ok_or("err")?;
         
     if let LinearBlock { ident, program } = main_block {
+        writeln!(&mut file,"    push ebp ; hello there
+    mov ebp,esp\n")?;
+
         for instruction in program{
             ir_instruction_generate_code_in_file(&mut file, instruction.clone())?;
         }
+        writeln!(&mut file,"   leave ; bye
+    ret")?;
     }
 
     Ok(())
@@ -108,19 +113,41 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
         little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => todo!(),
         little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => todo!(),
         little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => {
-            writeln!(file,"    mov [{}],{}_data_ptr_struc",to_reg.virtual_ident,static_ref.refname)?;
+            writeln!(file,"    mov [{}],{}_data_ptr_struc ; LinearInstruction::StaticRefToRegister\n",to_reg.virtual_ident,static_ref.refname)?;
         },
         little_intermediate_representation::LinearInstruction::PushToStack { register } => {
             writeln!(file,"    push [{}] ; LinearInstruction::PushToStack\n",register.virtual_ident)?;
         },
         little_intermediate_representation::LinearInstruction::PopFromStack { register } => {
             writeln!(file,"    pop esi ; LinearInstruction::PopFromStack
-    mov [{}],esi",register.virtual_ident)?;
+    mov [{}],esi\n",register.virtual_ident)?;
         },
-        little_intermediate_representation::LinearInstruction::LinkedListInit { output_reg } => todo!(),
-        little_intermediate_representation::LinearInstruction::LinkedListAdd { linked_list_reg, input_reg } => todo!(),
+        little_intermediate_representation::LinearInstruction::LinkedListInit { output_reg } => {
+            writeln!(file,"    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [{}],esi\n",output_reg.virtual_ident)?;
+        },
+        little_intermediate_representation::LinearInstruction::LinkedListAdd { linked_list_reg, input_reg } => {
+            writeln!(file,"    mov esi, dword[{}] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[{}] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8\n",linked_list_reg.virtual_ident,input_reg.virtual_ident)?;
+        },
         little_intermediate_representation::LinearInstruction::Assign { identifier, from_reg, scope } => todo!(),
-        little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments } => todo!(),
+        little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments } => {
+            writeln!(file,"    mov esi,[{}] ; LinearInstruction::Call
+    mov edi,[{}]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [{}],esi\n",function_pointer.virtual_ident,arguments.virtual_ident,output_reg.virtual_ident)?;
+        },
         little_intermediate_representation::LinearInstruction::Lookup { identifier, to_reg, scope } => {
             writeln!(file,"    push dword 0 ; LinearInstruction::Lookup
     push {}_actual

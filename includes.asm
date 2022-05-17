@@ -23,3 +23,48 @@ struc init_func_pointer
     .actual_func_ptr resd 1 ; ptr to the actual function
     .scope resd 1 ; ptr to the scope corresponding to this init func pointer
 endstruc
+
+section .text
+
+primitive_car_asm_actual:
+    ret
+primitive_display_asm_actual:
+    push ebp
+    mov ebp,esp
+    ; ebp+12 output
+    ; ebp+8 args
+
+    ; match first arg?
+    mov eax, [ebp+8] ; get arg list pointer
+    mov eax, [eax+linked_list_node.data] ; get data from first ll node
+    mov ebx, [eax+data_ptr.type]
+    ; need to match data_ptr.type
+    ; 0 - Uninitialized Data! Error? 
+    ; 1 - Number -> Ptr
+    ; 2 - Boolean -> Ptr
+    ; 3 - Identifier -> Ptr
+    ; 4 - String -> Ptr
+    ; 5 - List -> Ptr to LinkedList
+    ; 6 - 
+    ; 7 - 
+    ; 8 - 
+    ; 9 - Null / Nil
+
+    cmp ebx, 0
+    je 
+
+    cmp ebx
+
+.uninitialized
+
+.exit:
+    ; display returns nothing!
+    mov dword[ebp+12],42000
+
+    leave
+    ret
+
+primitive_cons_asm_actual:
+    ret
+primitive_cdr_asm_actual:
+    ret

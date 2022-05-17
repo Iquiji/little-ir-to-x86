@@ -16,3 +16,16 @@
 
 - define actual
 - define parents 
+
+# call structure for functions
+
+### step zero
+set current scope to new scope for the duration
+
+### step one
+push __empty_to_output_to
+push arg
+call func
+add esp,4
+
+### step two
