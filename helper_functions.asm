@@ -1,5 +1,6 @@
 %include "../includes.asm"
 section .data
+report_string dd "Panic!",0Ah,0h
 init_msg_in_lookup: db "init lookup",0h
 fmtd_str_compare:
     db "comparing: '%s' & '%s'", 0Ah, 0h 
@@ -53,7 +54,7 @@ string_cmp:
     ret
 
 
-extern printf
+extern printf,malloc
 
 lookup_in_scope_and_parents:
     ; takes ptr to ident string to search for in as arg
@@ -135,3 +136,82 @@ lookup_in_scope_and_parents:
 
 ; if not existing panic!?
 
+init_linked_list:
+    ; init a custom pointer for linked list here and output it into the given register:
+    ; takes one ebp+8 ptr to location that should link to created custom pointer
+    push ebp
+    mov ebp, esp
+
+    ; get loction that will be linked to
+    mov eax, dword[ebp+8]
+
+    ; 5 for type list
+    push linked_list_node_size
+    call malloc   ; result in eax
+    add esp, 4
+
+    test eax,eax
+    jz error_somewhere
+
+    mov [ebp+8], eax
+
+    mov [eax+linked_list_node.next], dword 0
+    mov [eax+linked_list_node.data], dword 0
+
+    leave    
+    ret
+
+add_to_linked_list:
+    ; add element to custom pointer for linked list here and output it into the given register:
+    ; takes one ebp+12 ptr to start of linked list
+    ; and ebp+8 data pointer to add
+    push ebp
+    mov ebp, esp
+
+    mov eax, [ebp+8]
+.node_search_for_empty_data_or_empty_next:
+
+    cmp dword[eax+linked_list_node.data], 0
+    je .data_clear_in_this_node
+
+    cmp dword[eax+linked_list_node.next], 0
+    je .next_empty_this_node
+
+    mov eax, dword[eax+linked_list_node.next]
+    jmp .node_search_for_empty_data_or_empty_next
+
+.next_empty_this_node:
+    ; need to call mallo for next node
+    push linked_list_node_size
+    call malloc   ; result in eax
+    add esp, 4
+
+    test eax,eax
+    jz error_somewhere
+
+    mov dword[eax+linked_list_node.next], dword 0
+
+.data_clear_in_this_node:
+    mov ebx,[ebp+12]
+    mov [eax+linked_list_node.data], ebx
+    jmp .exit
+
+.exit:
+    leave
+    ret
+
+error_somewhere:
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, report_string
+    mov edx, 7
+    int 80h
+
+    push report_string
+    call puts
+    add esp,4
+
+
+    mov eax, 1
+    mov ebx, 0
+    int 80h
