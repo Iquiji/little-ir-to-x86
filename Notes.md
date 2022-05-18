@@ -5,7 +5,7 @@
 3 - Identifier -> Ptr
 4 - String -> Ptr
 5 - List -> Ptr to LinkedList
-6 - 
+6 - Function -> Ptr InitialisedFuncitonPointer
 7 - 
 8 - 
 9 - Null / Nil

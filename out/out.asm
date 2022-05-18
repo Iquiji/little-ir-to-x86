@@ -158,7 +158,7 @@ main:
     push eax
 
     push eax
-    push dword 42
+    push dword static0_data_ptr_struc
     call add_to_linked_list
     add esp,8
 

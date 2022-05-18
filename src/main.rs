@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("translator: {:#?}", translator);
 
     // # Data Type Ids:
-    // 0 - Null / No Data
+    // 0 - 
     // 1 - Number -> Ptr
     // 2 - Boolean -> Ptr
     // 3 - Identifier -> Ptr
@@ -30,9 +30,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 6 - Function -> Ptr InitialisedFuncitonPointer
     // 7 -
     // 8 -
-    // 9 -
+    // 9 - Null / No Data
 
-    let mut file = File::create("out/gen.asm")?;
+    let mut file = File::create("gen/gen.asm")?;
 
     writeln!(&mut file,r#"%include "../includes.asm""#)?;
     writeln!(&mut file,r#"%include "../helper_functions.asm""#)?;
@@ -113,10 +113,10 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
         little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => todo!(),
         little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => todo!(),
         little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => {
-            writeln!(file,"    mov [{}],{}_data_ptr_struc ; LinearInstruction::StaticRefToRegister\n",to_reg.virtual_ident,static_ref.refname)?;
+            writeln!(file,"    mov dword[{}],{}_data_ptr_struc ; LinearInstruction::StaticRefToRegister\n",to_reg.virtual_ident,static_ref.refname)?;
         },
         little_intermediate_representation::LinearInstruction::PushToStack { register } => {
-            writeln!(file,"    push [{}] ; LinearInstruction::PushToStack\n",register.virtual_ident)?;
+            writeln!(file,"    push dword[{}] ; LinearInstruction::PushToStack\n",register.virtual_ident)?;
         },
         little_intermediate_representation::LinearInstruction::PopFromStack { register } => {
             writeln!(file,"    pop esi ; LinearInstruction::PopFromStack

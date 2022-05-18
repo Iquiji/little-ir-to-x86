@@ -1,11 +1,16 @@
 %define __empty_to_output_to 0
 section .data
-report_string dd "Panic!",0Ah,0h
-empty_scope_data_report_string dd "WARN: Empty Scope Data",0Ah,0h
+
+debug_output_lu db "got here and have here: %lu", 0Ah,0h
+report_string db "Panic!",0Ah,0h
+empty_scope_data_report_string db "WARN: Empty Scope Data",0Ah,0h
 init_msg_in_lookup: db "init lookup",0h
 fmtd_str_compare:
     db "comparing: '%s' & '%s'", 0Ah, 0h 
 section .text
+
+extern malloc,printf,puts
+
 string_cmp: 
     ; compares 2 strings ; first arg result ; second and third: first and second string respectevly
     ; returns 1 in first arg for true and 0 for false
@@ -278,10 +283,6 @@ auxilary_call_function:
     call ecx
     add esp,4
 
-    push empty_scope_data_report_string
-    call puts
-    add esp,4
-
     pop eax ; output we want to use later
 
     pop ebx
@@ -312,8 +313,31 @@ auxilary_clone_scope:
 
     ; now clone parent
     pop edx 
-    mov esi, dword [edx+scope_overlord.parent]
+
+    push eax
+    push edx
+
+    push eax
+    push debug_output_lu 
+    call printf
+    add esp,8
+
+    pop edx
+    pop eax
+
+    mov esi, dword[edx+scope_overlord.parent]
     mov [eax+scope_overlord.parent], esi
+
+    push eax
+    push edx
+
+    push eax
+    push debug_output_lu 
+    call printf
+    add esp,8
+
+    pop edx
+    pop eax
 
     cmp dword [edx+scope_overlord.scope_data], 0
     je .pre_quit_empty_scope_data
