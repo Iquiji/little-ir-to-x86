@@ -1,11 +1,11 @@
 %include "../includes.asm"
 %include "../helper_functions.asm"
 section .data
-static1_actual dd 1887 ; Autogen
-static1_data_ptr_struc:
+static0_actual db "display",0h ; Autogen
+static0_data_ptr_struc:
     istruc data_ptr
-        at data_ptr.type, dd    1
-        at data_ptr.mem, dd     static1_actual
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static0_actual
     iend
 
         
@@ -17,11 +17,11 @@ static2_data_ptr_struc:
     iend
 
         
-static0_actual db "display",0h ; Autogen
-static0_data_ptr_struc:
+static1_actual dd 1887 ; Autogen
+static1_data_ptr_struc:
     istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static0_actual
+        at data_ptr.type, dd    1
+        at data_ptr.mem, dd     static1_actual
     iend
 
         

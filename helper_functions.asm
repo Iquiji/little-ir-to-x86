@@ -7,6 +7,9 @@ empty_scope_data_report_string db "WARN: Empty Scope Data",0Ah,0h
 init_msg_in_lookup: db "init lookup: %lu",0Ah,0h
 fmtd_str_compare:
     db "comparing: '%s' & '%s'", 0Ah, 0h 
+
+fmtd_str_compare_adresses:
+    db "comparing: %lu and %lu",0Ah,0h
 section .text
 
 extern malloc,printf,puts
@@ -23,11 +26,17 @@ string_cmp:
     push esi 
     push edi
 
+    push dword[ebp+12]
+    push dword[ebp+8]
+    push dword fmtd_str_compare_adresses
+    call printf
+    add esp, 12
+
     push esi
     push edi
     push dword fmtd_str_compare
     call printf
-    add esp, 8
+    add esp, 12
 
     pop edi 
     pop esi
@@ -72,18 +81,17 @@ lookup_in_scope_and_parents:
     ; push current_overlord to stack
     mov eax, dword[ebp+8]
     push eax
-    
-    push ebx
+
     push eax
+    push ebx
 
     push eax
     push init_msg_in_lookup
     call printf
     add esp, 8
 
+    ; pop eax
     pop eax
-    pop eax
-
 
     mov esi, dword[eax + scope_overlord.scope_data]
 
