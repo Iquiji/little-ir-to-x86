@@ -110,11 +110,13 @@ primitive_display_asm_actual:
     jmp .exit
 
 .number:
-    mov eax, [ebp+8]
+    mov eax, [ebp+8] ; get arg list pointer
     mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.mem]
+    mov ebx, [ebx]
 
-    push ebx
     push eax
+    push ebx
     push display_fmt_number
     call printf
     add esp,12
@@ -125,9 +127,11 @@ primitive_display_asm_actual:
     mov eax, [ebp+8] ; get arg list pointer
     mov ebx, [eax+linked_list_node.data]
     mov ebx, [ebx+data_ptr.mem]
+    mov ebx, [ebx]
 
-    push ebx
+
     push eax
+    push ebx
     push display_fmt_boolean
     call printf
     add esp,12
@@ -139,6 +143,7 @@ primitive_display_asm_actual:
     mov eax, [ebp+8] ; get arg list pointer
     mov ebx, [eax+linked_list_node.data]
     mov ebx, [ebx+data_ptr.mem]
+    ; mov ebx,z [ebx]
 
     push eax
     push ebx
@@ -155,7 +160,6 @@ primitive_display_asm_actual:
 
     push eax
     push ebx
-
     push display_fmt_string
     call printf
     add esp,12
@@ -178,7 +182,7 @@ primitive_display_asm_actual:
     mov eax, [ebp+8]
 
     push eax
-    push display_fmt_number
+    push display_fmt_function
     call printf
     add esp,8
 

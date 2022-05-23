@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Hello, world!");
 
-    let mut parser = Parser::init_with_string(r#"(display '5)"#);
+    let mut parser = Parser::init_with_string(r#"(display 1887) (display "hello world!")"#);
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
@@ -100,7 +100,7 @@ primitive_{}_global_scope_string_ident:
         for instruction in program{
             ir_instruction_generate_code_in_file(&mut file, instruction.clone())?;
         }
-        writeln!(&mut file,"   leave ; bye
+        writeln!(&mut file,"    leave ; bye
     ret")?;
     }
 
@@ -176,7 +176,7 @@ fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,
 
     match static_item.1 {
         little_intermediate_representation::StaticData::Bool(boolean) => {
-            helper_write_actual_data_and_pointer(file,static_item.0,if *boolean { "1" } else { "0" },"db",2)?;
+            helper_write_actual_data_and_pointer(file,static_item.0,if *boolean { "1" } else { "0" },"dd",2)?;
 
         }
         little_intermediate_representation::StaticData::Integer(integer) => {

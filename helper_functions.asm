@@ -4,7 +4,7 @@ section .data
 debug_output_lu db "got here and have here: %lu", 0Ah,0h
 report_string db "Panic!",0Ah,0h
 empty_scope_data_report_string db "WARN: Empty Scope Data",0Ah,0h
-init_msg_in_lookup: db "init lookup",0h
+init_msg_in_lookup: db "init lookup: %lu",0Ah,0h
 fmtd_str_compare:
     db "comparing: '%s' & '%s'", 0Ah, 0h 
 section .text
@@ -75,9 +75,12 @@ lookup_in_scope_and_parents:
     
     push ebx
     push eax
+
+    push eax
     push init_msg_in_lookup
-    call puts
-    add esp, 4
+    call printf
+    add esp, 8
+
     pop eax
     pop eax
 
@@ -99,8 +102,8 @@ lookup_in_scope_and_parents:
     push eax
 
     push 0
-    push dword[ebp+12]
     push dword[ebx + scope_member.identifier]
+    push dword[ebp+12]
     call string_cmp
     add esp, 8
 
@@ -125,7 +128,7 @@ lookup_in_scope_and_parents:
 
     mov ecx, dword[ebx + scope_member.data]
     
-    mov ecx, dword[ecx]
+    ; mov ecx, dword[ecx]
 
     mov dword[ebp+16], ecx
     jmp .return

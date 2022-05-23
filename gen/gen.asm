@@ -1,14 +1,19 @@
 %include "../includes.asm"
 %include "../helper_functions.asm"
 section .data
-
-bye_msg dd "bye bye motherfucker",0Ah,0h
-fmtd_str_out dd "out: %lu",0Ah,0h
-static1_actual dd 5 ; Autogen
+static1_actual dd 1887 ; Autogen
 static1_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    1
         at data_ptr.mem, dd     static1_actual
+    iend
+
+        
+static2_actual db "display",0h ; Autogen
+static2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static2_actual
     iend
 
         
@@ -17,6 +22,14 @@ static0_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
         at data_ptr.mem, dd     static0_actual
+    iend
+
+        
+static3_actual db "hello world!",0h ; Autogen
+static3_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static3_actual
     iend
 
         
@@ -86,6 +99,7 @@ global_scope_data_ll_2:
             at scope_member.identifier, dd primitive_cons_global_scope_string_ident ; ptr to string ident
             at scope_member.data, dd primitive_cons_init_func_ptr_struc ; ptr to function
         iend
+
 primitive_display_init_func_ptr_struc:
         istruc init_func_pointer
             at init_func_pointer.actual_func_ptr, dd primitive_display_asm_actual ; actual pointer
@@ -105,7 +119,6 @@ global_scope_data_ll_3:
             at scope_member.identifier, dd primitive_display_global_scope_string_ident ; ptr to string ident
             at scope_member.data, dd primitive_display_init_func_ptr_struc ; ptr to function
         iend
-fmtd_str db "result from lookup?: %lu",0Ah,0h
 
 section .bss
 vreg0: resd 1
@@ -117,19 +130,22 @@ vreg5: resd 1
 vreg6: resd 1
 vreg7: resd 1
 vreg8: resd 1
+vreg9: resd 1
+vreg10: resd 1
+vreg11: resd 1
+vreg12: resd 1
+vreg13: resd 1
+vreg14: resd 1
+vreg15: resd 1
+vreg16: resd 1
 
 section .text
-extern printf,malloc,puts
+extern printf,malloc
 global main
 
 main:
-    push ebp
-    mov ebp, esp 
-
-    push primitive_display_init_func_ptr_struc
-    push fmtd_str
-    call printf
-    add esp, 8
+    push ebp ; hello there
+    mov ebp,esp
 
     push dword 0 ; LinearInstruction::Lookup
     push static0_actual
@@ -141,86 +157,103 @@ main:
 
     push dword[vreg0] ; LinearInstruction::PushToStack
 
-    push static0_actual
-    call puts
-    add esp,8
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg1],esi
 
-    push dword[vreg0]
-    push dword fmtd_str
-    call printf
-    add esp, 8
+    push dword[vreg1] ; LinearInstruction::PushToStack
 
-    push dword 0
-    call dword init_linked_list
-    pop eax
+    mov dword[vreg2],static1_data_ptr_struc ; LinearInstruction::StaticRefToRegister
 
-    push eax
-    push eax
+    push dword[vreg2] ; LinearInstruction::PushToStack
 
-    push eax
-    push dword static0_data_ptr_struc
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg3],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg4],esi
+
+    mov esi, dword[vreg4] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg3] ; input_reg
+    push esi 
+    push dword edi
     call add_to_linked_list
     add esp,8
 
-    pop eax
-    push eax
+    push dword[vreg4] ; LinearInstruction::PushToStack
 
-    push eax
-    push dword 187
-    call add_to_linked_list
-    add esp,8
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg5],esi
 
-    pop eax
-    push eax
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg6],esi
 
-    push eax
-    push dword 4
-    call add_to_linked_list
-    add esp, 8  
-
-    pop eax
-.loop_linked_list:
-    push eax
-    
-    mov edx, dword [eax+linked_list_node.data]
-
-    push dword edx
-    push dword fmtd_str_out
-    call printf
-    add esp, 8
-
-    pop eax 
-
-    cmp dword[eax+linked_list_node.next], 0
-    je .ex9t
-
-    mov eax, dword [eax+linked_list_node.next]
-    jmp .loop_linked_list
-
-.ex9t:
-    push eax
-    push fmtd_str
-    call printf
-    add esp, 8
-
-    ; call display_actual with our calling convention
-    ; little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments }
-    ; gotta clone the scope in function_pointer :O pain?
-    pop eax
-    
-    push __empty_to_output_to ; output here
-    push eax
-    push primitive_display_init_func_ptr_struc
+    mov esi,[vreg6] ; LinearInstruction::Call
+    mov edi,[vreg5]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
     call auxilary_call_function
     add esp,8
+    pop esi
+    mov [vreg7],esi
 
-    push fmtd_str_out
-    call printf
+    push dword[vreg5] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::Lookup
+    push static2_actual
+    push current_scope
+    call lookup_in_scope_and_parents
     add esp, 8
+    pop esi
+    mov dword[vreg8],esi
 
-    push dword bye_msg
-    call puts
-    add esp,4
+    push dword[vreg8] ; LinearInstruction::PushToStack
 
-    leave
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg9],esi
+
+    push dword[vreg9] ; LinearInstruction::PushToStack
+
+    mov dword[vreg10],static3_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+
+    push dword[vreg10] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg11],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg12],esi
+
+    mov esi, dword[vreg12] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg11] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
+
+    push dword[vreg12] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg13],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg14],esi
+
+    mov esi,[vreg14] ; LinearInstruction::Call
+    mov edi,[vreg13]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [vreg15],esi
+
+    push dword[vreg13] ; LinearInstruction::PushToStack
+
+    leave ; bye
     ret
