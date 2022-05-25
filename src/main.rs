@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Hello, world!");
 
-    let mut parser = Parser::init_with_string(r#"(display 1887) (display "hello world!")"#);
+    let mut parser = Parser::init_with_string(r#"(display "hello world! 0") (display "hello world! 1") (display (display "Return value should be uninitialized! ;)"))"#);
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
@@ -157,7 +157,7 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
     pop esi
     mov dword[{}],esi\n",identifier.refname,match scope{
     little_intermediate_representation::Scope::Global => "global_scope",
-    little_intermediate_representation::Scope::Current => "current_scope",
+    little_intermediate_representation::Scope::Current => "dword[current_scope]",
     little_intermediate_representation::Scope::Custom(_) => todo!(),
 },to_reg.virtual_ident)?;
 

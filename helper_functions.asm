@@ -26,14 +26,20 @@ string_cmp:
     push esi 
     push edi
 
-    push dword[ebp+12]
-    push dword[ebp+8]
-    push dword fmtd_str_compare_adresses
-    call printf
-    add esp, 12
+    ; push esi 
+    ; push edi
 
-    push esi
+    ; push esi
+    ; push edi
+    ; push dword fmtd_str_compare_adresses
+    ; call printf
+    ; add esp, 12
+
+    ; pop edi
+    ; pop esi
+
     push edi
+    push esi
     push dword fmtd_str_compare
     call printf
     add esp, 12
@@ -83,7 +89,7 @@ lookup_in_scope_and_parents:
     push eax
 
     push eax
-    push ebx
+    ; push ebx
 
     push eax
     push init_msg_in_lookup
@@ -91,6 +97,7 @@ lookup_in_scope_and_parents:
     add esp, 8
 
     ; pop eax
+    ; pop ebx
     pop eax
 
     mov esi, dword[eax + scope_overlord.scope_data]
@@ -106,12 +113,36 @@ lookup_in_scope_and_parents:
     mov ebx, dword[eax + scope_overlord.scope_data] ; ebx holds current scope_member in linked list
 .compare_in_member_list:
     push ebx
-
     push eax
 
+    mov esi, dword[ebp+12]
+    ; mov esi, [esi]
+
+    mov edi, ebx
+    add edi, scope_member.identifier
+    mov edi, [edi]
+
+    ; push eax
+    ; push ebx
+    ; push ecx
+    ; push esi
+    ; push edi
+
+    ; push esi
+    ; push edi
+    ; push dword fmtd_str_compare_adresses
+    ; call printf
+    ; add esp, 12
+
+    ; pop edi
+    ; pop esi
+    ; pop ecx
+    ; pop ebx
+    ; pop eax
+
     push 0
-    push dword[ebx + scope_member.identifier]
-    push dword[ebp+12]
+    push esi
+    push edi
     call string_cmp
     add esp, 8
 
@@ -257,7 +288,7 @@ auxilary_call_function:
 
     ; replace current scope for the duration of the call
     ; UPDATE: dont replace order it under?
-    mov ebx, current_scope
+    mov ebx, [current_scope]
     push ebx
 
     mov dword[eax+scope_overlord.parent],ebx ; set news scope parent to the current one so we push it on top
@@ -325,30 +356,30 @@ auxilary_clone_scope:
     ; now clone parent
     pop edx 
 
-    push eax
-    push edx
+    ; push eax
+    ; push edx
 
-    push eax
-    push debug_output_lu 
-    call printf
-    add esp,8
+    ; push eax
+    ; push debug_output_lu 
+    ; call printf
+    ; add esp,8
 
-    pop edx
-    pop eax
+    ; pop edx
+    ; pop eax
 
     mov esi, dword[edx+scope_overlord.parent]
     mov [eax+scope_overlord.parent], esi
 
-    push eax
-    push edx
+    ; push eax
+    ; push edx
 
-    push eax
-    push debug_output_lu 
-    call printf
-    add esp,8
+    ; push eax
+    ; push debug_output_lu 
+    ; call printf
+    ; add esp,8
 
-    pop edx
-    pop eax
+    ; pop edx
+    ; pop eax
 
     cmp dword [edx+scope_overlord.scope_data], 0
     je .pre_quit_empty_scope_data

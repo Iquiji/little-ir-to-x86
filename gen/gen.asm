@@ -1,11 +1,35 @@
 %include "../includes.asm"
 %include "../helper_functions.asm"
 section .data
-static0_actual db "display",0h ; Autogen
-static0_data_ptr_struc:
+static5_actual db "display",0h ; Autogen
+static5_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static0_actual
+        at data_ptr.mem, dd     static5_actual
+    iend
+
+        
+static4_actual db "display",0h ; Autogen
+static4_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static4_actual
+    iend
+
+        
+static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
+static6_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static6_actual
+    iend
+
+        
+static1_actual db "hello world! 0",0h ; Autogen
+static1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static1_actual
     iend
 
         
@@ -17,15 +41,15 @@ static2_data_ptr_struc:
     iend
 
         
-static1_actual dd 1887 ; Autogen
-static1_data_ptr_struc:
+static0_actual db "display",0h ; Autogen
+static0_data_ptr_struc:
     istruc data_ptr
-        at data_ptr.type, dd    1
-        at data_ptr.mem, dd     static1_actual
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static0_actual
     iend
 
         
-static3_actual db "hello world!",0h ; Autogen
+static3_actual db "hello world! 1",0h ; Autogen
 static3_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    4
@@ -138,6 +162,21 @@ vreg13: resd 1
 vreg14: resd 1
 vreg15: resd 1
 vreg16: resd 1
+vreg17: resd 1
+vreg18: resd 1
+vreg19: resd 1
+vreg20: resd 1
+vreg21: resd 1
+vreg22: resd 1
+vreg23: resd 1
+vreg24: resd 1
+vreg25: resd 1
+vreg26: resd 1
+vreg27: resd 1
+vreg28: resd 1
+vreg29: resd 1
+vreg30: resd 1
+vreg31: resd 1
 
 section .text
 extern printf,malloc
@@ -149,7 +188,7 @@ main:
 
     push dword 0 ; LinearInstruction::Lookup
     push static0_actual
-    push current_scope
+    push dword[current_scope]
     call lookup_in_scope_and_parents
     add esp, 8
     pop esi
@@ -203,7 +242,7 @@ main:
 
     push dword 0 ; LinearInstruction::Lookup
     push static2_actual
-    push current_scope
+    push dword[current_scope]
     call lookup_in_scope_and_parents
     add esp, 8
     pop esi
@@ -254,6 +293,110 @@ main:
     mov [vreg15],esi
 
     push dword[vreg13] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::Lookup
+    push static4_actual
+    push dword[current_scope]
+    call lookup_in_scope_and_parents
+    add esp, 8
+    pop esi
+    mov dword[vreg16],esi
+
+    push dword[vreg16] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg17],esi
+
+    push dword[vreg17] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::Lookup
+    push static5_actual
+    push dword[current_scope]
+    call lookup_in_scope_and_parents
+    add esp, 8
+    pop esi
+    mov dword[vreg18],esi
+
+    push dword[vreg18] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg19],esi
+
+    push dword[vreg19] ; LinearInstruction::PushToStack
+
+    mov dword[vreg20],static6_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+
+    push dword[vreg20] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg21],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg22],esi
+
+    mov esi, dword[vreg22] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg21] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
+
+    push dword[vreg22] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg23],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg24],esi
+
+    mov esi,[vreg24] ; LinearInstruction::Call
+    mov edi,[vreg23]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [vreg25],esi
+
+    push dword[vreg23] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg26],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg27],esi
+
+    mov esi, dword[vreg27] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg26] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
+
+    push dword[vreg27] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg28],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg29],esi
+
+    mov esi,[vreg29] ; LinearInstruction::Call
+    mov edi,[vreg28]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [vreg30],esi
+
+    push dword[vreg28] ; LinearInstruction::PushToStack
 
     leave ; bye
     ret
