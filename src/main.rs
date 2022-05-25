@@ -15,7 +15,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     (display "hello world! 0")
     (display "hello world! 1") 
     (display 
-        (display "Return value should be uninitialized! ;)"))"#);
+        (display "Return value should be uninitialized! ;)"))
+    (display '(hello list world))"#);
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
@@ -194,10 +195,30 @@ fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,
         little_intermediate_representation::StaticData::Identifier(identifier) => {
             helper_write_actual_data_and_pointer(file,static_item.0,identifier,"db",3)?;
         },
-        little_intermediate_representation::StaticData::List(_list) => {
-            
-            unimplemented!();
+        little_intermediate_representation::StaticData::List(list) => {
+            let gen_string = static_item.0.to_owned() + "_ll_item";
 
+            for item in list.iter().enumerate(){
+                let string_to_use = (static_item.0.to_owned() + "_ll_item_" + &item.0.to_string());
+                static_data_convert_to_handles_in_file(file, (&string_to_use,item.1))?;
+                
+                writeln!(file,"{}_{}:
+    istruc linked_list_node
+        at scope_member.next, dd {} ; none if last
+        at scope_member.data, dd {}_data_ptr_struc ; ptr to data
+    iend",gen_string.clone(),item.0,if item.0 == list.len()-1{"0".to_owned()}else{gen_string.clone() + "_" + &(item.0 + 1).to_string()},string_to_use)?;
+            }
+            
+            writeln!(file, "{}_data_ptr_struc:", static_item.0)?;
+            writeln!(
+                file,
+                "    istruc data_ptr
+    at data_ptr.type, dd    {}
+    at data_ptr.mem, dd     {}_0
+    iend\n",
+                5,
+                gen_string
+            )?;
         },
     }
 

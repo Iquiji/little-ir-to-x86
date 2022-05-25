@@ -1,35 +1,64 @@
 %include "../includes.asm"
 %include "../helper_functions.asm"
 section .data
-static5_actual db "display",0h ; Autogen
-static5_data_ptr_struc:
+static8_ll_item_0_actual db "hello",0h ; Autogen
+static8_ll_item_0_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static5_actual
+        at data_ptr.mem, dd     static8_ll_item_0_actual
     iend
 
         
-static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
-static6_data_ptr_struc:
+static8_ll_item_0:
+    istruc linked_list_node
+        at scope_member.next, dd static8_ll_item_1 ; none if last
+        at scope_member.data, dd static8_ll_item_0_data_ptr_struc ; ptr to data
+    iend
+static8_ll_item_1_actual db "list",0h ; Autogen
+static8_ll_item_1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static8_ll_item_1_actual
+    iend
+
+        
+static8_ll_item_1:
+    istruc linked_list_node
+        at scope_member.next, dd static8_ll_item_2 ; none if last
+        at scope_member.data, dd static8_ll_item_1_data_ptr_struc ; ptr to data
+    iend
+static8_ll_item_2_actual db "world",0h ; Autogen
+static8_ll_item_2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static8_ll_item_2_actual
+    iend
+
+        
+static8_ll_item_2:
+    istruc linked_list_node
+        at scope_member.next, dd 0 ; none if last
+        at scope_member.data, dd static8_ll_item_2_data_ptr_struc ; ptr to data
+    iend
+static8_data_ptr_struc:
+    istruc data_ptr
+    at data_ptr.type, dd    5
+    at data_ptr.mem, dd     static8_ll_item_0
+    iend
+
+static3_actual db "hello world! 1",0h ; Autogen
+static3_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static6_actual
+        at data_ptr.mem, dd     static3_actual
     iend
 
         
-static2_actual db "display",0h ; Autogen
-static2_data_ptr_struc:
+static7_actual db "display",0h ; Autogen
+static7_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static2_actual
-    iend
-
-        
-static0_actual db "display",0h ; Autogen
-static0_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static0_actual
+        at data_ptr.mem, dd     static7_actual
     iend
 
         
@@ -41,19 +70,43 @@ static4_data_ptr_struc:
     iend
 
         
+static5_actual db "display",0h ; Autogen
+static5_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_actual
+    iend
+
+        
+static2_actual db "display",0h ; Autogen
+static2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static2_actual
+    iend
+
+        
+static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
+static6_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static6_actual
+    iend
+
+        
+static0_actual db "display",0h ; Autogen
+static0_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static0_actual
+    iend
+
+        
 static1_actual db "hello world! 0",0h ; Autogen
 static1_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    4
         at data_ptr.mem, dd     static1_actual
-    iend
-
-        
-static3_actual db "hello world! 1",0h ; Autogen
-static3_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static3_actual
     iend
 
         
@@ -177,6 +230,14 @@ vreg28: resd 1
 vreg29: resd 1
 vreg30: resd 1
 vreg31: resd 1
+vreg32: resd 1
+vreg33: resd 1
+vreg34: resd 1
+vreg35: resd 1
+vreg36: resd 1
+vreg37: resd 1
+vreg38: resd 1
+vreg39: resd 1
 
 section .text
 extern printf,malloc
@@ -397,6 +458,60 @@ main:
     mov [vreg30],esi
 
     push dword[vreg28] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::Lookup
+    push static7_actual
+    push dword[current_scope]
+    call lookup_in_scope_and_parents
+    add esp, 8
+    pop esi
+    mov dword[vreg31],esi
+
+    push dword[vreg31] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg32],esi
+
+    push dword[vreg32] ; LinearInstruction::PushToStack
+
+    mov dword[vreg33],static8_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+
+    push dword[vreg33] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg34],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg35],esi
+
+    mov esi, dword[vreg35] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg34] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
+
+    push dword[vreg35] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg36],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg37],esi
+
+    mov esi,[vreg37] ; LinearInstruction::Call
+    mov edi,[vreg36]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [vreg38],esi
+
+    push dword[vreg36] ; LinearInstruction::PushToStack
 
     leave ; bye
     ret
