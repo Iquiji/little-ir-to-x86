@@ -11,7 +11,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Hello, world!");
 
-    let mut parser = Parser::init_with_string(r#"(display "hello world! 0") (display "hello world! 1") (display (display "Return value should be uninitialized! ;)"))"#);
+    let mut parser = Parser::init_with_string(r#"
+    (display "hello world! 0")
+    (display "hello world! 1") 
+    (display 
+        (display "Return value should be uninitialized! ;)"))"#);
     let ast = parser.re_program();
 
     let mut translator = Translator::default();

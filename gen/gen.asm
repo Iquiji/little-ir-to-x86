@@ -9,27 +9,11 @@ static5_data_ptr_struc:
     iend
 
         
-static4_actual db "display",0h ; Autogen
-static4_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static4_actual
-    iend
-
-        
 static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
 static6_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    4
         at data_ptr.mem, dd     static6_actual
-    iend
-
-        
-static1_actual db "hello world! 0",0h ; Autogen
-static1_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static1_actual
     iend
 
         
@@ -46,6 +30,22 @@ static0_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
         at data_ptr.mem, dd     static0_actual
+    iend
+
+        
+static4_actual db "display",0h ; Autogen
+static4_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static4_actual
+    iend
+
+        
+static1_actual db "hello world! 0",0h ; Autogen
+static1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static1_actual
     iend
 
         
