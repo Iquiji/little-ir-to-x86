@@ -2,3 +2,5 @@
 Cargo.lock
 out/out.o
 out/out.out
+gen/gen.out
+gen/gen.o
