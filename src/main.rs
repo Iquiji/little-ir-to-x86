@@ -204,8 +204,8 @@ fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,
                 
                 writeln!(file,"{}_{}:
     istruc linked_list_node
-        at scope_member.next, dd {} ; none if last
-        at scope_member.data, dd {}_data_ptr_struc ; ptr to data
+        at linked_list_node.next, dd {} ; none if last
+        at linked_list_node.data, dd {}_data_ptr_struc ; ptr to data
     iend",gen_string.clone(),item.0,if item.0 == list.len()-1{"0".to_owned()}else{gen_string.clone() + "_" + &(item.0 + 1).to_string()},string_to_use)?;
             }
             

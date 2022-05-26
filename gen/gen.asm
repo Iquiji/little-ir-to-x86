@@ -1,96 +1,11 @@
 %include "../includes.asm"
 %include "../helper_functions.asm"
 section .data
-static8_ll_item_0_actual db "hello",0h ; Autogen
-static8_ll_item_0_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_0_actual
-    iend
-
-        
-static8_ll_item_0:
-    istruc linked_list_node
-        at scope_member.next, dd static8_ll_item_1 ; none if last
-        at scope_member.data, dd static8_ll_item_0_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_1_actual db "list",0h ; Autogen
-static8_ll_item_1_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_1_actual
-    iend
-
-        
-static8_ll_item_1:
-    istruc linked_list_node
-        at scope_member.next, dd static8_ll_item_2 ; none if last
-        at scope_member.data, dd static8_ll_item_1_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_2_actual db "world",0h ; Autogen
-static8_ll_item_2_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_2_actual
-    iend
-
-        
-static8_ll_item_2:
-    istruc linked_list_node
-        at scope_member.next, dd 0 ; none if last
-        at scope_member.data, dd static8_ll_item_2_data_ptr_struc ; ptr to data
-    iend
-static8_data_ptr_struc:
-    istruc data_ptr
-    at data_ptr.type, dd    5
-    at data_ptr.mem, dd     static8_ll_item_0
-    iend
-
-static3_actual db "hello world! 1",0h ; Autogen
-static3_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static3_actual
-    iend
-
-        
 static7_actual db "display",0h ; Autogen
 static7_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
         at data_ptr.mem, dd     static7_actual
-    iend
-
-        
-static4_actual db "display",0h ; Autogen
-static4_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static4_actual
-    iend
-
-        
-static5_actual db "display",0h ; Autogen
-static5_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static5_actual
-    iend
-
-        
-static2_actual db "display",0h ; Autogen
-static2_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static2_actual
-    iend
-
-        
-static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
-static6_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static6_actual
     iend
 
         
@@ -102,11 +17,96 @@ static0_data_ptr_struc:
     iend
 
         
+static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
+static6_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static6_actual
+    iend
+
+        
+static5_actual db "display",0h ; Autogen
+static5_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_actual
+    iend
+
+        
+static3_actual db "hello world! 1",0h ; Autogen
+static3_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    4
+        at data_ptr.mem, dd     static3_actual
+    iend
+
+        
+static8_ll_item_0_actual db "hello",0h ; Autogen
+static8_ll_item_0_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static8_ll_item_0_actual
+    iend
+
+        
+static8_ll_item_0:
+    istruc linked_list_node
+        at linked_list_node.next, dd static8_ll_item_1 ; none if last
+        at linked_list_node.data, dd static8_ll_item_0_data_ptr_struc ; ptr to data
+    iend
+static8_ll_item_1_actual db "list",0h ; Autogen
+static8_ll_item_1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static8_ll_item_1_actual
+    iend
+
+        
+static8_ll_item_1:
+    istruc linked_list_node
+        at linked_list_node.next, dd static8_ll_item_2 ; none if last
+        at linked_list_node.data, dd static8_ll_item_1_data_ptr_struc ; ptr to data
+    iend
+static8_ll_item_2_actual db "world",0h ; Autogen
+static8_ll_item_2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static8_ll_item_2_actual
+    iend
+
+        
+static8_ll_item_2:
+    istruc linked_list_node
+        at linked_list_node.next, dd 0 ; none if last
+        at linked_list_node.data, dd static8_ll_item_2_data_ptr_struc ; ptr to data
+    iend
+static8_data_ptr_struc:
+    istruc data_ptr
+    at data_ptr.type, dd    5
+    at data_ptr.mem, dd     static8_ll_item_0
+    iend
+
 static1_actual db "hello world! 0",0h ; Autogen
 static1_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    4
         at data_ptr.mem, dd     static1_actual
+    iend
+
+        
+static2_actual db "display",0h ; Autogen
+static2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static2_actual
+    iend
+
+        
+static4_actual db "display",0h ; Autogen
+static4_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static4_actual
     iend
 
         

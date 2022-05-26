@@ -90,9 +90,11 @@ primitive_display_asm_actual:
 
     ; error if something else!
     
-    mov eax, [ebp+8]
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
 
-    push eax
+    push ebx
     push display_fmt_impossible_value
     call printf
     add esp,8
@@ -174,9 +176,46 @@ primitive_display_asm_actual:
     push display_fmt_list
     call printf
     add esp,8
+    
+    ; go through each element and call primitive_display_asm_actual
+    mov eax, [ebp+8] ; get arg list pointer
+    mov eax, [eax+linked_list_node.data]
+    mov eax, [eax+data_ptr.mem]
 
-    jmp .exit
+.list_loop:
+    push eax
 
+    mov ebx, dword[eax + linked_list_node.data]
+    ; mov ebx, dword[ebx]
+    push ebx
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+
+    pop ebx
+    push esi
+
+    push esi 
+    push ebx
+    call add_to_linked_list
+    add esp,8
+
+    pop esi
+
+    push 0
+    push esi
+    call primitive_display_asm_actual
+    add esp, 8
+
+    pop eax
+
+    cmp dword[eax + linked_list_node.next], 0
+    je .exit
+
+    mov eax, [eax + linked_list_node.next]
+
+    jmp .list_loop
 
 .functions_pointer:
     mov eax, [ebp+8]
