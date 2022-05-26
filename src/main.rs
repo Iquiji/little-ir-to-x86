@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     (display "hello world! 1") 
     (display 
         (display "Return value should be uninitialized! ;)"))
-    (display '(hello list world))"#);
+    (display '(hello list world (list in list ?! (on another level !!!))))"#);
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
