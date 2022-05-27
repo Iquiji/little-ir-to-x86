@@ -1,22 +1,24 @@
 use std::fs::File;
 use std::io::Write;
 
-use little_intermediate_representation::{Translator, StaticData, LinearBlock};
+use little_intermediate_representation::{LinearBlock, StaticData, Translator};
 use little_parser::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-
     // name in global scope and name in actulal asm
-    let primitives: Vec<String> = vec!["car".to_owned(),"cdr".to_owned(),"cons".to_owned(),"display".to_owned()];
+    let primitives: Vec<String> = vec![
+        "car".to_owned(),
+        "cdr".to_owned(),
+        "cons".to_owned(),
+        "display".to_owned(),
+    ];
 
     println!("Hello, world!");
 
-    let mut parser = Parser::init_with_string(r#"
-    (display "hello world! 0")
-    (display "hello world! 1") 
-    (display 
-        (display "Return value should be uninitialized! ;)"))
-    (display '(hello list world (list in list ?! (on another level !!!))))"#);
+    let mut parser = Parser::init_with_string(
+        r#"
+    (display (car (cons 'carrot (car '((zeroth list with five elements) first_element_of_car second_element_of_car)))))"#,
+    );
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
@@ -26,7 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("translator: {:#?}", translator);
 
     // # Data Type Ids:
-    // 0 - 
+    // 0 -
     // 1 - Number -> Ptr
     // 2 - Boolean -> Ptr
     // 3 - Identifier -> Ptr
@@ -39,10 +41,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create("gen/gen.asm")?;
 
-    writeln!(&mut file,r#"%include "../includes.asm""#)?;
-    writeln!(&mut file,r#"%include "../helper_functions.asm""#)?;
+    writeln!(&mut file, r#"%include "../includes.asm""#)?;
+    writeln!(&mut file, r#"%include "../helper_functions.asm""#)?;
 
-    writeln!(&mut file,"section .data")?;
+    writeln!(&mut file, "section .data")?;
 
     for static_item in translator.static_data.iter() {
         static_data_convert_to_handles_in_file(&mut file, static_item)?;
@@ -50,19 +52,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // write global scope head:
 
-    writeln!(&mut file,"global_scope:
+    writeln!(
+        &mut file,
+        "global_scope:
     istruc scope_overlord
         at scope_overlord.parent, dd 0 ; global scope doesnt have parents!
         at scope_overlord.scope_data, dd global_scope_data_ll_0
-    iend")?;
-    writeln!(&mut file,"current_scope dd global_scope")?;
+    iend"
+    )?;
+    writeln!(&mut file, "current_scope dd global_scope")?;
 
-    for primitive in primitives.iter().enumerate(){
+    for primitive in primitives.iter().enumerate() {
         // generate global scope:
         // iterative linked list for the start
         // One overlord node for each because each needs its own node
         // but we must put all the primitives together into one as well for the global scope
-        writeln!(&mut file,"\nprimitive_{}_init_func_ptr_struc:
+        writeln!(
+            &mut file,
+            "\nprimitive_{}_init_func_ptr_struc:
         istruc init_func_pointer
             at init_func_pointer.actual_func_ptr, dd primitive_{}_asm_actual ; actual pointer
             at init_func_pointer.scope, dd primitive_{}_init_scope ; ptr to scope
@@ -74,7 +81,9 @@ primitive_{}_init_scope:
         iend
     
 primitive_{}_global_scope_string_ident:
-        db \"{}\", 0h",primitive.1,primitive.1,primitive.1,primitive.1,primitive.1,primitive.1)?;
+        db \"{}\", 0h",
+            primitive.1, primitive.1, primitive.1, primitive.1, primitive.1, primitive.1
+        )?;
 
         writeln!(&mut file,"global_scope_data_ll_{}:
         istruc scope_member
@@ -84,39 +93,53 @@ primitive_{}_global_scope_string_ident:
         iend",primitive.0,if primitive.0 == primitives.len()-1{"0".to_owned()}else{"global_scope_data_ll_".to_owned() + &(primitive.0 + 1).to_string()},primitive.1,primitive.1)?;
     }
 
-    
-
-    writeln!(&mut file,"\nsection .bss")?;
-    for reg in 0..=translator.register_counter{
-        writeln!(&mut file,"{}: resd 1","vreg".to_owned() + &reg.to_string())?;
+    writeln!(&mut file, "\nsection .bss")?;
+    for reg in 0..=translator.register_counter {
+        writeln!(
+            &mut file,
+            "{}: resd 1",
+            "vreg".to_owned() + &reg.to_string()
+        )?;
     }
-    
-    writeln!(&mut file,"\nsection .text")?;
-    writeln!(&mut file,"extern printf,malloc")?;
-    writeln!(&mut file,"global main")?;
-    writeln!(&mut file,"\nmain:")?;
+
+    writeln!(&mut file, "\nsection .text")?;
+    writeln!(&mut file, "extern printf,malloc")?;
+    writeln!(&mut file, "global main")?;
+    writeln!(&mut file, "\nmain:")?;
 
     let main_block = translator.lambda_map.get("main").ok_or("err")?;
-        
-    if let LinearBlock { ident, program } = main_block {
-        writeln!(&mut file,"    push ebp ; hello there
-    mov ebp,esp\n")?;
 
-        for instruction in program{
+    if let LinearBlock { ident, program } = main_block {
+        writeln!(
+            &mut file,
+            "    push ebp ; hello there
+    mov ebp,esp\n"
+        )?;
+
+        for instruction in program {
             ir_instruction_generate_code_in_file(&mut file, instruction.clone())?;
         }
-        writeln!(&mut file,"    leave ; bye
-    ret")?;
+        writeln!(
+            &mut file,
+            "    leave ; bye
+    ret"
+        )?;
     }
 
     Ok(())
 }
-fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_intermediate_representation::LinearInstruction) -> Result<(),Box<dyn std::error::Error>>{
-    
+fn ir_instruction_generate_code_in_file(
+    file: &mut File,
+    ir_instruction: little_intermediate_representation::LinearInstruction,
+) -> Result<(), Box<dyn std::error::Error>> {
     match ir_instruction{
         little_intermediate_representation::LinearInstruction::AcceptToFormals { static_formals_list } => todo!(),
-        little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => todo!(),
-        little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => todo!(),
+        little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => {
+            writeln!(file,"    call new_scope_attached_to_and_replacing_current ; LinearInstruction::NewScopeAttachedToAndReplacingCurrent\n")?;
+        },
+        little_intermediate_representation::LinearInstruction::PopScopeAndReplaceWithUpper => {
+            writeln!(file,"    call pop_scope_and_replace_with_parent ; LinearInstruction::PopScopeAndReplaceWithUpper\n")?;
+        },
         little_intermediate_representation::LinearInstruction::StaticRefToRegister { static_ref, to_reg } => {
             writeln!(file,"    mov dword[{}],{}_data_ptr_struc ; LinearInstruction::StaticRefToRegister\n",to_reg.virtual_ident,static_ref.refname)?;
         },
@@ -141,7 +164,17 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
     call add_to_linked_list
     add esp,8\n",linked_list_reg.virtual_ident,input_reg.virtual_ident)?;
         },
-        little_intermediate_representation::LinearInstruction::Assign { identifier, from_reg, scope } => todo!(),
+        little_intermediate_representation::LinearInstruction::Assign { identifier, from_reg, scope } => {
+            writeln!(file,"    push {}_actual ; LinearInstruction::Assign
+    push dword[{}]
+    push {}
+    call assign_in_scope
+    add esp, 12\n",identifier.refname, from_reg.virtual_ident, match scope{
+            little_intermediate_representation::Scope::Global => "global_scope",
+            little_intermediate_representation::Scope::Current => "dword[current_scope]",
+            little_intermediate_representation::Scope::Custom(_) => todo!(),
+        })?;
+        },
         little_intermediate_representation::LinearInstruction::Call { output_reg, function_pointer, arguments } => {
             writeln!(file,"    mov esi,[{}] ; LinearInstruction::Call
     mov edi,[{}]
@@ -175,40 +208,62 @@ fn ir_instruction_generate_code_in_file(file: &mut File,ir_instruction: little_i
     Ok(())
 }
 
-
-fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,&StaticData)) -> Result<(),Box<dyn std::error::Error>>{
+fn static_data_convert_to_handles_in_file(
+    file: &mut File,
+    static_item: (&String, &StaticData),
+) -> Result<(), Box<dyn std::error::Error>> {
     println!("static data item: {:#?}", static_item);
 
     match static_item.1 {
         little_intermediate_representation::StaticData::Bool(boolean) => {
-            helper_write_actual_data_and_pointer(file,static_item.0,if *boolean { "1" } else { "0" },"dd",2)?;
-
+            helper_write_actual_data_and_pointer(
+                file,
+                static_item.0,
+                if *boolean { "1" } else { "0" },
+                "dd",
+                2,
+            )?;
         }
         little_intermediate_representation::StaticData::Integer(integer) => {
-            helper_write_actual_data_and_pointer(file,static_item.0,&integer.to_string(),"dd",1)?;
-
+            helper_write_actual_data_and_pointer(
+                file,
+                static_item.0,
+                &integer.to_string(),
+                "dd",
+                1,
+            )?;
         }
         little_intermediate_representation::StaticData::String(string) => {
-            helper_write_actual_data_and_pointer(file,static_item.0,string,"db",4)?;
-
-        },
+            helper_write_actual_data_and_pointer(file, static_item.0, string, "db", 4)?;
+        }
         little_intermediate_representation::StaticData::Identifier(identifier) => {
-            helper_write_actual_data_and_pointer(file,static_item.0,identifier,"db",3)?;
-        },
+            helper_write_actual_data_and_pointer(file, static_item.0, identifier, "db", 3)?;
+        }
         little_intermediate_representation::StaticData::List(list) => {
             let gen_string = static_item.0.to_owned() + "_ll_item";
 
-            for item in list.iter().enumerate(){
+            for item in list.iter().enumerate() {
                 let string_to_use = (static_item.0.to_owned() + "_ll_item_" + &item.0.to_string());
-                static_data_convert_to_handles_in_file(file, (&string_to_use,item.1))?;
-                
-                writeln!(file,"{}_{}:
+                static_data_convert_to_handles_in_file(file, (&string_to_use, item.1))?;
+
+                writeln!(
+                    file,
+                    "{}_{}:
     istruc linked_list_node
         at linked_list_node.next, dd {} ; none if last
         at linked_list_node.data, dd {}_data_ptr_struc ; ptr to data
-    iend",gen_string.clone(),item.0,if item.0 == list.len()-1{"0".to_owned()}else{gen_string.clone() + "_" + &(item.0 + 1).to_string()},string_to_use)?;
+    iend",
+                    gen_string.clone(),
+                    item.0,
+                    if item.0 == list.len() - 1 {
+                        "0".to_owned()
+                    } else {
+                        gen_string.clone() + "_" + &(item.0 + 1).to_string()
+                    },
+                    string_to_use
+                )?;
             }
-            
+
             writeln!(file, "{}_data_ptr_struc:", static_item.0)?;
             writeln!(
                 file,
@@ -216,17 +271,30 @@ fn static_data_convert_to_handles_in_file(file: &mut File,static_item: (&String,
     at data_ptr.type, dd    {}
     at data_ptr.mem, dd     {}_0
     iend\n",
-                5,
-                gen_string
+                5, gen_string
             )?;
-        },
+        }
     }
 
     Ok(())
 }
 
-fn helper_write_actual_data_and_pointer(file: &mut File,name: &str,data_str: &str,db_or_dd: &str,type_num: u32,) -> Result<(),Box<dyn std::error::Error>>{
-    writeln!(file, r#"{}_actual {} {}{}{} ; Autogen"#, name,db_or_dd,if db_or_dd == "db"{r#"""#}else{""}, data_str,if db_or_dd == "db"{r#"",0h"#}else{""})?;
+fn helper_write_actual_data_and_pointer(
+    file: &mut File,
+    name: &str,
+    data_str: &str,
+    db_or_dd: &str,
+    type_num: u32,
+) -> Result<(), Box<dyn std::error::Error>> {
+    writeln!(
+        file,
+        r#"{}_actual {} {}{}{} ; Autogen"#,
+        name,
+        db_or_dd,
+        if db_or_dd == "db" { r#"""# } else { "" },
+        data_str,
+        if db_or_dd == "db" { r#"",0h"# } else { "" }
+    )?;
     writeln!(file, "{}_data_ptr_struc:", name,)?;
     writeln!(
         file,
@@ -235,8 +303,7 @@ fn helper_write_actual_data_and_pointer(file: &mut File,name: &str,data_str: &st
         at data_ptr.mem, dd     {}_actual
     iend\n
         ",
-        type_num,
-        name
+        type_num, name
     )?;
 
     Ok(())

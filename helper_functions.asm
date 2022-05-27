@@ -2,7 +2,7 @@
 section .data
 
 debug_output_lu db "got here and have here: %lu", 0Ah,0h
-report_string db "Panic!",0Ah,0h
+report_string db "Panic! Probably malloc xD",0Ah,0h
 empty_scope_data_report_string db "WARN: Empty Scope Data",0Ah,0h
 init_msg_in_lookup: db "init lookup: %lu",0Ah,0h
 fmtd_str_compare:
@@ -100,7 +100,7 @@ lookup_in_scope_and_parents:
     ; pop ebx
     pop eax
 
-    mov esi, dword[eax + scope_overlord.scope_data]
+    ; mov esi, dword[eax + scope_overlord.scope_data]
 
     ; pop eax
     
@@ -445,5 +445,56 @@ auxilary_clone_scope:
     add esp,4
 
 .quit:
+    leave
+    ret
+
+new_scope_attached_to_and_replacing_current:
+    ; makes new scope overlord with no member and replaces the current scope with it
+    push ebp
+    mov ebp, esp
+
+    push scope_overlord_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    mov edx, [current_scope]
+    mov [eax + scope_overlord.parent], edx
+    mov dword[eax + scope_overlord.scope_data], 0
+    
+    mov dword[current_scope], eax 
+
+    leave
+    ret
+
+pop_scope_and_replace_with_parent:
+    ; pop current_scope and replaces with its parent
+    push ebp
+    mov ebp, esp
+
+    mov eax, [current_scope]
+    mov eax, [eax + scope_overlord.parent]
+
+    mov dword[current_scope], eax 
+
+    leave
+    ret
+
+assign_in_scope:
+    ; assigns var in scope
+    ; [ebp+8] -> scope | [ebp+12] -> data to assign | [ebp+16] -> identifier to bind to
+    push ebp
+    mov ebp, esp
+
+    ; step one make new scope_member entry
+    push scope_member_size
+    call malloc 
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
     leave
     ret

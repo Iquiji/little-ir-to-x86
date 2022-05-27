@@ -1,222 +1,27 @@
 %include "../includes.asm"
 %include "../helper_functions.asm"
 section .data
-static1_actual db "hello world! 0",0h ; Autogen
-static1_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static1_actual
-    iend
-
-        
-static4_actual db "display",0h ; Autogen
-static4_data_ptr_struc:
+static2_actual db "cons",0h ; Autogen
+static2_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static4_actual
+        at data_ptr.mem, dd     static2_actual
     iend
 
         
-static6_actual db "Return value should be uninitialized! ;)",0h ; Autogen
-static6_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    4
-        at data_ptr.mem, dd     static6_actual
-    iend
-
-        
-static3_actual db "hello world! 1",0h ; Autogen
+static3_actual db "carrot",0h ; Autogen
 static3_data_ptr_struc:
     istruc data_ptr
-        at data_ptr.type, dd    4
+        at data_ptr.type, dd    3
         at data_ptr.mem, dd     static3_actual
     iend
 
         
-static7_actual db "display",0h ; Autogen
-static7_data_ptr_struc:
+static4_actual db "car",0h ; Autogen
+static4_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static7_actual
-    iend
-
-        
-static8_ll_item_0_actual db "hello",0h ; Autogen
-static8_ll_item_0_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_0_actual
-    iend
-
-        
-static8_ll_item_0:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_1 ; none if last
-        at linked_list_node.data, dd static8_ll_item_0_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_1_actual db "list",0h ; Autogen
-static8_ll_item_1_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_1_actual
-    iend
-
-        
-static8_ll_item_1:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_2 ; none if last
-        at linked_list_node.data, dd static8_ll_item_1_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_2_actual db "world",0h ; Autogen
-static8_ll_item_2_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_2_actual
-    iend
-
-        
-static8_ll_item_2:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3 ; none if last
-        at linked_list_node.data, dd static8_ll_item_2_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_0_actual db "list",0h ; Autogen
-static8_ll_item_3_ll_item_0_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_0_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_0:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_1 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_0_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_1_actual db "in",0h ; Autogen
-static8_ll_item_3_ll_item_1_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_1_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_1:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_2 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_1_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_2_actual db "list",0h ; Autogen
-static8_ll_item_3_ll_item_2_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_2_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_2:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_3 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_2_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_3_actual db "?!",0h ; Autogen
-static8_ll_item_3_ll_item_3_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_3_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_3:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_4 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_3_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_4_ll_item_0_actual db "on",0h ; Autogen
-static8_ll_item_3_ll_item_4_ll_item_0_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_4_ll_item_0_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_4_ll_item_0:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_4_ll_item_1 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_4_ll_item_0_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_4_ll_item_1_actual db "another",0h ; Autogen
-static8_ll_item_3_ll_item_4_ll_item_1_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_4_ll_item_1_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_4_ll_item_1:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_4_ll_item_2 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_4_ll_item_1_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_4_ll_item_2_actual db "level",0h ; Autogen
-static8_ll_item_3_ll_item_4_ll_item_2_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_4_ll_item_2_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_4_ll_item_2:
-    istruc linked_list_node
-        at linked_list_node.next, dd static8_ll_item_3_ll_item_4_ll_item_3 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_4_ll_item_2_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_4_ll_item_3_actual db "!!!",0h ; Autogen
-static8_ll_item_3_ll_item_4_ll_item_3_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static8_ll_item_3_ll_item_4_ll_item_3_actual
-    iend
-
-        
-static8_ll_item_3_ll_item_4_ll_item_3:
-    istruc linked_list_node
-        at linked_list_node.next, dd 0 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_4_ll_item_3_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_ll_item_4_data_ptr_struc:
-    istruc data_ptr
-    at data_ptr.type, dd    5
-    at data_ptr.mem, dd     static8_ll_item_3_ll_item_4_ll_item_0
-    iend
-
-static8_ll_item_3_ll_item_4:
-    istruc linked_list_node
-        at linked_list_node.next, dd 0 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_ll_item_4_data_ptr_struc ; ptr to data
-    iend
-static8_ll_item_3_data_ptr_struc:
-    istruc data_ptr
-    at data_ptr.type, dd    5
-    at data_ptr.mem, dd     static8_ll_item_3_ll_item_0
-    iend
-
-static8_ll_item_3:
-    istruc linked_list_node
-        at linked_list_node.next, dd 0 ; none if last
-        at linked_list_node.data, dd static8_ll_item_3_data_ptr_struc ; ptr to data
-    iend
-static8_data_ptr_struc:
-    istruc data_ptr
-    at data_ptr.type, dd    5
-    at data_ptr.mem, dd     static8_ll_item_0
-    iend
-
-static5_actual db "display",0h ; Autogen
-static5_data_ptr_struc:
-    istruc data_ptr
-        at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static5_actual
+        at data_ptr.mem, dd     static4_actual
     iend
 
         
@@ -228,11 +33,119 @@ static0_data_ptr_struc:
     iend
 
         
-static2_actual db "display",0h ; Autogen
-static2_data_ptr_struc:
+static5_ll_item_0_ll_item_0_actual db "zeroth",0h ; Autogen
+static5_ll_item_0_ll_item_0_data_ptr_struc:
     istruc data_ptr
         at data_ptr.type, dd    3
-        at data_ptr.mem, dd     static2_actual
+        at data_ptr.mem, dd     static5_ll_item_0_ll_item_0_actual
+    iend
+
+        
+static5_ll_item_0_ll_item_0:
+    istruc linked_list_node
+        at linked_list_node.next, dd static5_ll_item_0_ll_item_1 ; none if last
+        at linked_list_node.data, dd static5_ll_item_0_ll_item_0_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_0_ll_item_1_actual db "list",0h ; Autogen
+static5_ll_item_0_ll_item_1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_ll_item_0_ll_item_1_actual
+    iend
+
+        
+static5_ll_item_0_ll_item_1:
+    istruc linked_list_node
+        at linked_list_node.next, dd static5_ll_item_0_ll_item_2 ; none if last
+        at linked_list_node.data, dd static5_ll_item_0_ll_item_1_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_0_ll_item_2_actual db "with",0h ; Autogen
+static5_ll_item_0_ll_item_2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_ll_item_0_ll_item_2_actual
+    iend
+
+        
+static5_ll_item_0_ll_item_2:
+    istruc linked_list_node
+        at linked_list_node.next, dd static5_ll_item_0_ll_item_3 ; none if last
+        at linked_list_node.data, dd static5_ll_item_0_ll_item_2_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_0_ll_item_3_actual db "five",0h ; Autogen
+static5_ll_item_0_ll_item_3_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_ll_item_0_ll_item_3_actual
+    iend
+
+        
+static5_ll_item_0_ll_item_3:
+    istruc linked_list_node
+        at linked_list_node.next, dd static5_ll_item_0_ll_item_4 ; none if last
+        at linked_list_node.data, dd static5_ll_item_0_ll_item_3_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_0_ll_item_4_actual db "elements",0h ; Autogen
+static5_ll_item_0_ll_item_4_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_ll_item_0_ll_item_4_actual
+    iend
+
+        
+static5_ll_item_0_ll_item_4:
+    istruc linked_list_node
+        at linked_list_node.next, dd 0 ; none if last
+        at linked_list_node.data, dd static5_ll_item_0_ll_item_4_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_0_data_ptr_struc:
+    istruc data_ptr
+    at data_ptr.type, dd    5
+    at data_ptr.mem, dd     static5_ll_item_0_ll_item_0
+    iend
+
+static5_ll_item_0:
+    istruc linked_list_node
+        at linked_list_node.next, dd static5_ll_item_1 ; none if last
+        at linked_list_node.data, dd static5_ll_item_0_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_1_actual db "first_element_of_car",0h ; Autogen
+static5_ll_item_1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_ll_item_1_actual
+    iend
+
+        
+static5_ll_item_1:
+    istruc linked_list_node
+        at linked_list_node.next, dd static5_ll_item_2 ; none if last
+        at linked_list_node.data, dd static5_ll_item_1_data_ptr_struc ; ptr to data
+    iend
+static5_ll_item_2_actual db "second_element_of_car",0h ; Autogen
+static5_ll_item_2_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static5_ll_item_2_actual
+    iend
+
+        
+static5_ll_item_2:
+    istruc linked_list_node
+        at linked_list_node.next, dd 0 ; none if last
+        at linked_list_node.data, dd static5_ll_item_2_data_ptr_struc ; ptr to data
+    iend
+static5_data_ptr_struc:
+    istruc data_ptr
+    at data_ptr.type, dd    5
+    at data_ptr.mem, dd     static5_ll_item_0
+    iend
+
+static1_actual db "car",0h ; Autogen
+static1_data_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd    3
+        at data_ptr.mem, dd     static1_actual
     iend
 
         
@@ -357,13 +270,6 @@ vreg29: resd 1
 vreg30: resd 1
 vreg31: resd 1
 vreg32: resd 1
-vreg33: resd 1
-vreg34: resd 1
-vreg35: resd 1
-vreg36: resd 1
-vreg37: resd 1
-vreg38: resd 1
-vreg39: resd 1
 
 section .text
 extern printf,malloc
@@ -390,42 +296,22 @@ main:
 
     push dword[vreg1] ; LinearInstruction::PushToStack
 
-    mov dword[vreg2],static1_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+    push dword 0 ; LinearInstruction::Lookup
+    push static1_actual
+    push dword[current_scope]
+    call lookup_in_scope_and_parents
+    add esp, 8
+    pop esi
+    mov dword[vreg2],esi
 
     push dword[vreg2] ; LinearInstruction::PushToStack
 
-    pop esi ; LinearInstruction::PopFromStack
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
     mov [vreg3],esi
 
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg4],esi
-
-    mov esi, dword[vreg4] ; linked_list_reg ; LinearInstruction::LinkedListAdd
-    mov edi, dword[vreg3] ; input_reg
-    push esi 
-    push dword edi
-    call add_to_linked_list
-    add esp,8
-
-    push dword[vreg4] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg5],esi
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg6],esi
-
-    mov esi,[vreg6] ; LinearInstruction::Call
-    mov edi,[vreg5]
-    push __empty_to_output_to ; output here 
-    push edi
-    push esi
-    call auxilary_call_function
-    add esp,8
-    pop esi
-    mov [vreg7],esi
-
-    push dword[vreg5] ; LinearInstruction::PushToStack
+    push dword[vreg3] ; LinearInstruction::PushToStack
 
     push dword 0 ; LinearInstruction::Lookup
     push static2_actual
@@ -433,53 +319,35 @@ main:
     call lookup_in_scope_and_parents
     add esp, 8
     pop esi
-    mov dword[vreg8],esi
+    mov dword[vreg4],esi
 
-    push dword[vreg8] ; LinearInstruction::PushToStack
+    push dword[vreg4] ; LinearInstruction::PushToStack
 
     push dword 0 ; LinearInstruction::LinkedListInit
     call init_linked_list
     pop esi
-    mov [vreg9],esi
+    mov [vreg5],esi
 
-    push dword[vreg9] ; LinearInstruction::PushToStack
+    push dword[vreg5] ; LinearInstruction::PushToStack
 
-    mov dword[vreg10],static3_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+    mov dword[vreg6],static3_data_ptr_struc ; LinearInstruction::StaticRefToRegister
 
-    push dword[vreg10] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg11],esi
+    push dword[vreg6] ; LinearInstruction::PushToStack
 
     pop esi ; LinearInstruction::PopFromStack
-    mov [vreg12],esi
+    mov [vreg7],esi
 
-    mov esi, dword[vreg12] ; linked_list_reg ; LinearInstruction::LinkedListAdd
-    mov edi, dword[vreg11] ; input_reg
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg8],esi
+
+    mov esi, dword[vreg8] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg7] ; input_reg
     push esi 
     push dword edi
     call add_to_linked_list
     add esp,8
 
-    push dword[vreg12] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg13],esi
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg14],esi
-
-    mov esi,[vreg14] ; LinearInstruction::Call
-    mov edi,[vreg13]
-    push __empty_to_output_to ; output here 
-    push edi
-    push esi
-    call auxilary_call_function
-    add esp,8
-    pop esi
-    mov [vreg15],esi
-
-    push dword[vreg13] ; LinearInstruction::PushToStack
+    push dword[vreg8] ; LinearInstruction::PushToStack
 
     push dword 0 ; LinearInstruction::Lookup
     push static4_actual
@@ -487,157 +355,152 @@ main:
     call lookup_in_scope_and_parents
     add esp, 8
     pop esi
-    mov dword[vreg16],esi
+    mov dword[vreg9],esi
+
+    push dword[vreg9] ; LinearInstruction::PushToStack
+
+    push dword 0 ; LinearInstruction::LinkedListInit
+    call init_linked_list
+    pop esi
+    mov [vreg10],esi
+
+    push dword[vreg10] ; LinearInstruction::PushToStack
+
+    mov dword[vreg11],static5_data_ptr_struc ; LinearInstruction::StaticRefToRegister
+
+    push dword[vreg11] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg12],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg13],esi
+
+    mov esi, dword[vreg13] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg12] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
+
+    push dword[vreg13] ; LinearInstruction::PushToStack
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg14],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg15],esi
+
+    mov esi,[vreg15] ; LinearInstruction::Call
+    mov edi,[vreg14]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
+    mov [vreg16],esi
 
     push dword[vreg16] ; LinearInstruction::PushToStack
 
-    push dword 0 ; LinearInstruction::LinkedListInit
-    call init_linked_list
-    pop esi
+    pop esi ; LinearInstruction::PopFromStack
     mov [vreg17],esi
 
-    push dword[vreg17] ; LinearInstruction::PushToStack
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg18],esi
 
-    push dword 0 ; LinearInstruction::Lookup
-    push static5_actual
-    push dword[current_scope]
-    call lookup_in_scope_and_parents
-    add esp, 8
-    pop esi
-    mov dword[vreg18],esi
+    mov esi, dword[vreg18] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg17] ; input_reg
+    push esi 
+    push dword edi
+    call add_to_linked_list
+    add esp,8
 
     push dword[vreg18] ; LinearInstruction::PushToStack
 
-    push dword 0 ; LinearInstruction::LinkedListInit
-    call init_linked_list
-    pop esi
+    pop esi ; LinearInstruction::PopFromStack
     mov [vreg19],esi
 
-    push dword[vreg19] ; LinearInstruction::PushToStack
-
-    mov dword[vreg20],static6_data_ptr_struc ; LinearInstruction::StaticRefToRegister
-
-    push dword[vreg20] ; LinearInstruction::PushToStack
-
     pop esi ; LinearInstruction::PopFromStack
+    mov [vreg20],esi
+
+    mov esi,[vreg20] ; LinearInstruction::Call
+    mov edi,[vreg19]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
     mov [vreg21],esi
+
+    push dword[vreg21] ; LinearInstruction::PushToStack
 
     pop esi ; LinearInstruction::PopFromStack
     mov [vreg22],esi
 
-    mov esi, dword[vreg22] ; linked_list_reg ; LinearInstruction::LinkedListAdd
-    mov edi, dword[vreg21] ; input_reg
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg23],esi
+
+    mov esi, dword[vreg23] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg22] ; input_reg
     push esi 
     push dword edi
     call add_to_linked_list
     add esp,8
-
-    push dword[vreg22] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg23],esi
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg24],esi
-
-    mov esi,[vreg24] ; LinearInstruction::Call
-    mov edi,[vreg23]
-    push __empty_to_output_to ; output here 
-    push edi
-    push esi
-    call auxilary_call_function
-    add esp,8
-    pop esi
-    mov [vreg25],esi
 
     push dword[vreg23] ; LinearInstruction::PushToStack
 
     pop esi ; LinearInstruction::PopFromStack
+    mov [vreg24],esi
+
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg25],esi
+
+    mov esi,[vreg25] ; LinearInstruction::Call
+    mov edi,[vreg24]
+    push __empty_to_output_to ; output here 
+    push edi
+    push esi
+    call auxilary_call_function
+    add esp,8
+    pop esi
     mov [vreg26],esi
+
+    push dword[vreg26] ; LinearInstruction::PushToStack
 
     pop esi ; LinearInstruction::PopFromStack
     mov [vreg27],esi
 
-    mov esi, dword[vreg27] ; linked_list_reg ; LinearInstruction::LinkedListAdd
-    mov edi, dword[vreg26] ; input_reg
+    pop esi ; LinearInstruction::PopFromStack
+    mov [vreg28],esi
+
+    mov esi, dword[vreg28] ; linked_list_reg ; LinearInstruction::LinkedListAdd
+    mov edi, dword[vreg27] ; input_reg
     push esi 
     push dword edi
     call add_to_linked_list
     add esp,8
 
-    push dword[vreg27] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg28],esi
+    push dword[vreg28] ; LinearInstruction::PushToStack
 
     pop esi ; LinearInstruction::PopFromStack
     mov [vreg29],esi
 
-    mov esi,[vreg29] ; LinearInstruction::Call
-    mov edi,[vreg28]
-    push __empty_to_output_to ; output here 
-    push edi
-    push esi
-    call auxilary_call_function
-    add esp,8
-    pop esi
+    pop esi ; LinearInstruction::PopFromStack
     mov [vreg30],esi
 
-    push dword[vreg28] ; LinearInstruction::PushToStack
-
-    push dword 0 ; LinearInstruction::Lookup
-    push static7_actual
-    push dword[current_scope]
-    call lookup_in_scope_and_parents
-    add esp, 8
-    pop esi
-    mov dword[vreg31],esi
-
-    push dword[vreg31] ; LinearInstruction::PushToStack
-
-    push dword 0 ; LinearInstruction::LinkedListInit
-    call init_linked_list
-    pop esi
-    mov [vreg32],esi
-
-    push dword[vreg32] ; LinearInstruction::PushToStack
-
-    mov dword[vreg33],static8_data_ptr_struc ; LinearInstruction::StaticRefToRegister
-
-    push dword[vreg33] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg34],esi
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg35],esi
-
-    mov esi, dword[vreg35] ; linked_list_reg ; LinearInstruction::LinkedListAdd
-    mov edi, dword[vreg34] ; input_reg
-    push esi 
-    push dword edi
-    call add_to_linked_list
-    add esp,8
-
-    push dword[vreg35] ; LinearInstruction::PushToStack
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg36],esi
-
-    pop esi ; LinearInstruction::PopFromStack
-    mov [vreg37],esi
-
-    mov esi,[vreg37] ; LinearInstruction::Call
-    mov edi,[vreg36]
+    mov esi,[vreg30] ; LinearInstruction::Call
+    mov edi,[vreg29]
     push __empty_to_output_to ; output here 
     push edi
     push esi
     call auxilary_call_function
     add esp,8
     pop esi
-    mov [vreg38],esi
+    mov [vreg31],esi
 
-    push dword[vreg36] ; LinearInstruction::PushToStack
+    push dword[vreg31] ; LinearInstruction::PushToStack
 
     leave ; bye
     ret

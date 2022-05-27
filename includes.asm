@@ -36,10 +36,56 @@ display_fmt_list: db "DISPLAY: List! Address: %#10x", 0Ah, 0h
 display_fmt_function: db "DISPLAY: Function! Address: %#10x", 0Ah, 0h
 display_fmt_null: db "DISPLAY: Null! Address: %#10x", 0Ah, 0h
 display_fmt_impossible_value: db "DISPLAY: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
+display_fmt_warn_list_ptr_mem_zero db "DISPAY: WARN list data ptr mem is zero // List empty?",0Ah, 0h
+car_fmt_impossible_type: db "CAR: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
+cdr_fmt_impossible_type: db "CDR: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
+cons_fmt_impossible_type: db "CONS: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
 
 section .text
 
 primitive_car_asm_actual:
+    push ebp
+    mov ebp,esp
+    ; ebp+12 output
+    ; ebp+8 args
+
+    ; match first arg?
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
+
+    cmp ebx, 5
+    jne .invalid_type
+
+    mov eax, [ebp+8] ; get arg list pointer
+    mov eax, [eax+linked_list_node.data]
+    mov eax, [eax+data_ptr.mem] ; get memory of first arg
+
+
+    mov ebx, dword[eax + linked_list_node.data] ; get first element of linked list from arg
+    ; mov ecx, [ebx + data_ptr.type]
+
+    ; push ecx
+    ; push display_fmt_null
+    ; call printf
+    ; add esp, 8
+
+    mov [ebp+12], ebx ; return the first element
+
+    jmp .exit
+
+.invalid_type:
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
+
+    push ebx
+    push car_fmt_impossible_type
+    call printf
+    add esp,8
+
+.exit:
+    leave
     ret
 primitive_display_asm_actual:
     push ebp
@@ -182,10 +228,23 @@ primitive_display_asm_actual:
     mov eax, [eax+linked_list_node.data]
     mov eax, [eax+data_ptr.mem]
 
+    cmp eax, 0
+    je .list_ptr_mem_zero
+
+    jmp .list_loop
+
+.list_ptr_mem_zero:
+
+    push display_fmt_warn_list_ptr_mem_zero
+    call puts
+    add esp,4
+
+    jmp .exit
 .list_loop:
     push eax
 
     mov ebx, dword[eax + linked_list_node.data]
+
     ; mov ebx, dword[ebx]
     push ebx
 
@@ -245,7 +304,121 @@ primitive_display_asm_actual:
     leave
     ret
 
-primitive_cons_asm_actual:
-    ret
 primitive_cdr_asm_actual:
+    push ebp
+    mov ebp,esp
+    ; ebp+12 output
+    ; ebp+8 args
+
+    ; match first arg?
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
+
+    cmp ebx, 5
+    jne .invalid_type
+
+    mov eax, [ebp+8] ; get arg list pointer
+    mov eax, [eax+linked_list_node.data]
+    mov eax, [eax+data_ptr.mem] ; get memory of first arg
+
+    mov ebx, dword[eax + linked_list_node.next] ; get second element of linked list from arg
+    push ebx
+
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx
+    mov [eax + data_ptr.type], dword 5
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+12], eax ; return the first element
+
+    jmp .exit
+
+.invalid_type:
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
+
+    push ebx
+    push cdr_fmt_impossible_type
+    call printf
+    add esp,8
+
+.exit:
+    leave
+    ret
+
+primitive_cons_asm_actual:
+    push ebp
+    mov ebp,esp
+    ; ebp+12 output
+    ; ebp+8 args
+
+    ; match second arg for list to prepend to
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.next]
+    mov ebx, [ebx+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
+
+    cmp ebx, 5
+    jne .invalid_type
+
+    mov eax, [ebp+8] ; get arg list pointer
+    mov eax, [eax+linked_list_node.data] ; get data_ptr of first arg
+    push eax
+    ; make linked list node for first arg to prepend second arg list
+
+    push linked_list_node_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; prev eax // first arg data_ptr
+    mov [eax + linked_list_node.data], ebx
+
+    mov ecx, [ebp+8] ; get arg list pointer
+    mov ecx, [ecx + linked_list_node.next]
+    mov ecx, [ecx+linked_list_node.data] 
+    mov ecx, [ecx+data_ptr.mem]; get linked list of second arg
+
+    mov [eax + linked_list_node.next], ecx
+
+    push eax ; new first linked list element
+
+    ; now make new data_ptr
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new first linked list element
+    mov [eax + data_ptr.type], dword 5
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+12], eax ; return the first element
+
+    jmp .exit
+
+.invalid_type:
+    mov eax, [ebp+8] ; get arg list pointer
+    mov ebx, [eax+linked_list_node.data]
+    mov ebx, [ebx+data_ptr.type]
+
+    push ebx
+    push cons_fmt_impossible_type
+    call printf
+    add esp,8
+
+.exit:
+    leave
     ret
