@@ -408,6 +408,17 @@ auxilary_clone_scope:
     ; ecx current member to clone from
     ; edx new member to clone to
 .clone_members:
+    push eax
+    push edx
+
+    push debug_was_here
+    call puts
+    add esp,4
+
+    pop edx
+    pop eax
+
+
     mov eax, [edx+scope_member.data] ; intermediate for copying data location
     mov ebx, [edx+scope_member.identifier] ; intermediate for copying identifier location
 
@@ -495,6 +506,108 @@ assign_in_scope:
 
     test eax,eax
     jz error_somewhere
+
+    ; get first scope entry to set new first scope element in a second
+    mov ebx, [ebp+8]
+    mov ebx, [ebx+scope_overlord.scope_data]
+    
+    mov [eax + scope_member.next], ebx
+    
+    mov ebx, [ebp+12]
+
+    mov [eax + scope_member.data], ebx
+
+    mov ebx, [ebp+16]
+    
+    mov [eax + scope_member.identifier], ebx
+
+    ; now set new first scope member / scope_data for scope_overlord
+    mov ebx, [ebp+8]
+    mov [ebx+scope_overlord.scope_data], eax
+
+    leave
+    ret
+
+initialize_function_pointer:
+    ; initializes function pointer with corresponding (compressed // dont think i have to :]) scope and code location pointer
+    ; [ebp+8] -> scope | [ebp+12] -> function pointer to build for | [ebp+16] output
+    push ebp
+    mov ebp, esp
+
+    ; step one compress current scope ;)
+    mov eax, [ebp+8]
+
+    ; push eax
+    ; push debug_output_lu
+    ; call printf
+    ; add esp,8
+
+    push 0 ; clones scope
+    push eax
+    call auxilary_clone_scope
+    add esp,4
+
+    pop ebx
+    mov ecx, ebx ; scope_overlord to use later
+
+.clone_more_parents:
+    cmp [ebx + scope_overlord.parent], dword 0 ; we can continue making our initialized function pointer
+    je .continue_initializing
+
+    ; we need to clone more!
+
+    mov edx, [ebx + scope_overlord.parent]
+
+    push ebx
+
+    push 0
+    push edx
+    call auxilary_clone_scope
+    add esp,4
+    pop eax
+
+    pop ebx
+
+    mov [ebx + scope_overlord.parent], eax
+    mov ebx, eax
+
+    jmp .clone_more_parents
+
+.continue_initializing:
+    ; make new initialized function pointer
+    push ecx ; our cloned scope stack
+
+    push init_func_pointer_size
+    call malloc 
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ecx
+
+    mov [eax + init_func_pointer.scope], ecx
+
+    mov ebx, [ebp+12]
+
+    mov [eax + init_func_pointer.actual_func_ptr], ebx
+
+    ; now make data_ptr
+    push eax
+
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx
+
+    mov [eax + data_ptr.type], dword 6
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+16], eax
 
     leave
     ret

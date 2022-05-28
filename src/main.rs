@@ -15,10 +15,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Hello, world!");
 
+    /*
+    (display (car (cons 'carrot (car '((zeroth list with five elements) first_element_of_car second_element_of_car)))))
+    (display "now to the let statements?!")
+    (let ((n (cons 'carrot (car '((zeroth list with five elements) first_element_of_car second_element_of_car)))) (x 7)) (display x) (display n))
+    */
+
     let mut parser = Parser::init_with_string(
         r#"
-    (display (car (cons 'carrot (car '((zeroth list with five elements) first_element_of_car second_element_of_car)))))"#,
+    (lambda (n) n)"#,
     );
+
     let ast = parser.re_program();
 
     let mut translator = Translator::default();
@@ -105,11 +112,30 @@ primitive_{}_global_scope_string_ident:
     writeln!(&mut file, "\nsection .text")?;
     writeln!(&mut file, "extern printf,malloc")?;
     writeln!(&mut file, "global main")?;
-    writeln!(&mut file, "\nmain:")?;
+//     writeln!(&mut file, "\nmain:")?;
 
-    let main_block = translator.lambda_map.get("main").ok_or("err")?;
+//     let main_block = translator.lambda_map.get("main").ok_or("err")?;
 
-    if let LinearBlock { ident, program } = main_block {
+
+//     let LinearBlock { ident: _, program } = main_block;
+//     writeln!(
+//         &mut file,
+//         "    push ebp ; hello there
+// mov ebp,esp\n"
+//     )?;
+
+//     for instruction in program {
+//         ir_instruction_generate_code_in_file(&mut file, instruction.clone())?;
+//     }
+//     writeln!(
+//         &mut file,
+//         "    leave ; bye
+// ret"
+//     )?;
+
+    for lambda in translator.lambda_map.into_iter(){
+        let LinearBlock { ident: _, program } = lambda.1;
+        writeln!(&mut file, "\n{}:",lambda.0)?;
         writeln!(
             &mut file,
             "    push ebp ; hello there
@@ -119,6 +145,7 @@ primitive_{}_global_scope_string_ident:
         for instruction in program {
             ir_instruction_generate_code_in_file(&mut file, instruction.clone())?;
         }
+
         writeln!(
             &mut file,
             "    leave ; bye
@@ -133,7 +160,12 @@ fn ir_instruction_generate_code_in_file(
     ir_instruction: little_intermediate_representation::LinearInstruction,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match ir_instruction{
-        little_intermediate_representation::LinearInstruction::AcceptToFormals { static_formals_list } => todo!(),
+        little_intermediate_representation::LinearInstruction::AcceptToFormals { static_formals_list } => {
+            writeln!(file,"    push dword[ebp+8] ; LinearInstruction::AcceptToFormals
+    push {}_data_ptr_struc
+    call new_scope_attached_to_and_replacing_current 
+    add esp,8\n",static_formals_list.refname)?;
+        },
         little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => {
             writeln!(file,"    call new_scope_attached_to_and_replacing_current ; LinearInstruction::NewScopeAttachedToAndReplacingCurrent\n")?;
         },
@@ -201,8 +233,23 @@ fn ir_instruction_generate_code_in_file(
 
         },
         little_intermediate_representation::LinearInstruction::Cond { condition, branc_if_true } => todo!(),
-        little_intermediate_representation::LinearInstruction::Return { value } => todo!(),
-        little_intermediate_representation::LinearInstruction::InitializeFunctionPointer { function, from_scope, outpu_reg } => todo!(),
+        little_intermediate_representation::LinearInstruction::Return { value } => {
+            writeln!(file,"    mov esi, dword[{}] ; LinearInstruction::Return
+    mov [ebp+12], esi\n",value.virtual_ident)?;
+        },
+        little_intermediate_representation::LinearInstruction::InitializeFunctionPointer { function, from_scope, outpu_reg } => {
+            writeln!(file,"    push __empty_to_output_to ; output here ; LinearInstruction::InitializeFunctionPointer
+    push {}
+    push {}
+    call initialize_function_pointer
+    add esp,8
+    pop esi
+    mov [{}],esi\n",function.actual_func,match from_scope{
+        little_intermediate_representation::Scope::Global => "global_scope",
+        little_intermediate_representation::Scope::Current => "dword[current_scope]",
+        little_intermediate_representation::Scope::Custom(_) => todo!(),
+    },outpu_reg.virtual_ident)?;
+        },
     }
 
     Ok(())

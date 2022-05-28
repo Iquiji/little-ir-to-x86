@@ -2,5 +2,7 @@
 Cargo.lock
 out/out.o
 out/out.out
+out/out.asm
 gen/gen.out
 gen/gen.o
+gen/gen.asm
