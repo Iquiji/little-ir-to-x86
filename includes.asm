@@ -491,3 +491,181 @@ primitive_plus_asm_actual:
 
     leave
     ret
+
+primitive_atom_eq?_asm_actual:
+    ; compares the first 2 entries in ll
+    push ebp 
+    mov ebp, esp
+
+    mov eax, [ebp+8]
+    mov ebx, [eax + linked_list_node.next]
+
+    mov eax, [eax + linked_list_node.data]
+    mov ebx, [ebx + linked_list_node.data]
+
+    cmp eax, 0
+    je .false
+
+    cmp ebx, 0
+    je .false
+
+    mov ecx, [eax + data_ptr.type]
+    mov edx, [ebx + data_ptr.type]
+
+    cmp ecx, edx
+    jne .false
+
+    mov ecx, [eax + data_ptr.mem]
+    mov edx, [ebx + data_ptr.mem]
+    mov ecx, [ecx]
+    mov edx, [edx]
+
+    cmp ecx, edx
+    jne .false
+
+
+    jmp .true
+
+.true:
+    push 4 ; alloc boolean in memory
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    mov dword[eax], 1
+    push eax ; push our pointer to boolean
+
+    ; now make new data_ptr
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new name for our boolean pointer
+    mov [eax + data_ptr.type], dword 2
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+12], eax
+
+    jmp .exit
+.false:
+    push 4 ; alloc boolean in memory
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    mov dword[eax], 0
+    push eax ; push our pointer to boolean
+
+    ; now make new data_ptr
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new name for our boolean pointer
+    mov [eax + data_ptr.type], dword 2
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+12], eax
+
+    jmp .exit
+.exit:
+
+    leave
+    ret
+
+primitive_minus_asm_actual:
+    push ebp
+    mov ebp,esp
+
+    mov edx, [ebp+8] ; get arg list pointer
+    mov eax, dword 0 ; adder
+
+    mov ebx, [edx + linked_list_node.data]
+
+    cmp ebx, 0
+    je .exit
+
+    cmp dword[ebx + data_ptr.type], 1
+    jne .invalid_type
+
+    mov ecx, [ebx + data_ptr.mem]
+    mov ecx, [ecx]
+    add eax, ecx
+
+    cmp dword[edx + linked_list_node.next], 0
+    je .exit
+
+    mov edx, [edx + linked_list_node.next]
+
+    jmp .minus_loop
+
+.minus_loop:
+    mov ebx, [edx + linked_list_node.data]
+
+    cmp ebx, 0
+    je .exit
+
+    cmp dword[ebx + data_ptr.type], 1
+    jne .invalid_type
+
+    mov ecx, [ebx + data_ptr.mem]
+    mov ecx, [ecx]
+    sub eax, ecx
+
+    cmp dword[edx + linked_list_node.next], 0
+    je .exit
+
+    mov edx, [edx + linked_list_node.next]
+
+    jmp .minus_loop
+
+.invalid_type:
+    push eax
+
+    push dword[ebx + data_ptr.type]
+    push plus_fmt_impossible_type
+    call printf
+    add esp,8
+
+    pop eax
+.exit:
+    push eax
+
+    ; now make new data_ptr
+    push 4 ; alloc number in memory
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new name for our accumulator
+    mov [eax], ebx
+    push eax ; push our pointer to accumulator
+
+    ; now make new data_ptr
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new name for our accumulator pointer
+    mov [eax + data_ptr.type], dword 1
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+12],eax
+
+    leave
+    ret

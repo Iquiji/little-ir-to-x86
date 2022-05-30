@@ -23,29 +23,29 @@ string_cmp:
     mov esi, [ebp+12]
     mov edi, [ebp+8]
 
-    push esi 
-    push edi
-
     ; push esi 
     ; push edi
 
-    ; push esi
+    ; ; push esi 
+    ; ; push edi
+
+    ; ; push esi
+    ; ; push edi
+    ; ; push dword fmtd_str_compare_adresses
+    ; ; call printf
+    ; ; add esp, 12
+
+    ; ; pop edi
+    ; ; pop esi
+
     ; push edi
-    ; push dword fmtd_str_compare_adresses
+    ; push esi
+    ; push dword fmtd_str_compare
     ; call printf
     ; add esp, 12
 
-    ; pop edi
+    ; pop edi 
     ; pop esi
-
-    push edi
-    push esi
-    push dword fmtd_str_compare
-    call printf
-    add esp, 12
-
-    pop edi 
-    pop esi
 
 
     mov ecx, 0            ; index and loop counter
@@ -88,17 +88,17 @@ lookup_in_scope_and_parents:
     mov eax, dword[ebp+8]
     push eax
 
-    push eax
-    ; push ebx
+    ; push eax
+    ; ; push ebx
 
-    push eax
-    push init_msg_in_lookup
-    call printf
-    add esp, 8
+    ; push eax
+    ; push init_msg_in_lookup
+    ; call printf
+    ; add esp, 8
 
+    ; ; pop eax
+    ; ; pop ebx
     ; pop eax
-    ; pop ebx
-    pop eax
 
     ; mov esi, dword[eax + scope_overlord.scope_data]
 
@@ -463,9 +463,9 @@ auxilary_clone_scope:
 
 .pre_quit_empty_scope_data:
     ; report empty scope data as WARN for now
-    push empty_scope_data_report_string
-    call puts
-    add esp,4
+    ; push empty_scope_data_report_string
+    ; call puts
+    ; add esp,4
 
 .quit:
     leave
@@ -510,6 +510,18 @@ assign_in_scope:
     ; [ebp+8] -> scope | [ebp+12] -> data to assign | [ebp+16] -> identifier to bind to
     push ebp
     mov ebp, esp
+
+    ; push eax
+    ; push ecx
+    ; push edx
+
+    ; push dword[ebp+16]
+    ; call puts
+    ; add esp,4
+
+    ; pop edx
+    ; pop ecx
+    ; pop eax
 
     ; step one make new scope_member entry
     push scope_member_size
@@ -675,6 +687,21 @@ accept_to_formals:
     mov eax, [eax + linked_list_node.next]
     mov ebx, [ebx + linked_list_node.next]
 
+    jmp .assign_loop
 .exit:
     leave 
+    ret
+
+auxilary_is_true_in_cond:
+    ; [ebp+8] data_ptr for boolean | [ebp+12] output either 0 or 1
+    push ebp
+    mov ebp, esp
+
+    mov eax, [ebp+8]
+    mov eax, [eax + data_ptr.mem]
+    mov eax, [eax]
+
+    mov [ebp+12],eax
+
+    leave
     ret

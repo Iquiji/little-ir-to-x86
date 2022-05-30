@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 
-use little_intermediate_representation::{LinearBlock, StaticData, Translator};
+use little_intermediate_representation::{LinearBlock, StaticData, Translator, LinearInstruction};
 use little_parser::Parser;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -12,6 +12,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "cons".to_owned(),
         "display".to_owned(),
         "plus".to_owned(),
+        "atom_eq?".to_owned(),
+        "minus".to_owned()
     ];
 
     println!("Hello, world!");
@@ -24,8 +26,45 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut parser = Parser::init_with_string(
         r#"
-    (define cust_func (lambda (n) (display n) (cust_func (plus n 1))))
-    (display (cust_func 0))"#,
+        (define cust_func (lambda (n1 n2) (display n1) (cust_func (plus n1 1) (cons n1 n2))))
+        (define fibonnaci (lambda (x y) (display x) (fibonnaci y (plus x y))))
+        (define cond_test 
+            (lambda (x) 
+                (cond 
+                    ((atom_eq? x 5) (display "equals 5 :]"))
+                    (else  (display "doesnt equal 5 :["))
+                )
+            )
+        )
+        (define times
+            (lambda (n m)
+              (cond
+                [(atom_eq? m 0) 0]
+                [else (plus n (times n (minus m 1)))])))
+        (define factorial 
+            (lambda (n) 
+                (cond 
+                    ((atom_eq? n 0) 1) 
+                    (else (times n (factorial (minus n 1)))))))
+        (cond_test 5)
+        (display (times 2 2))
+        (display (factorial 4))
+
+        (define high-ord-test (lambda (f n) (f n) n))
+
+        (display (high-ord-test (lambda (n) (display (times n 6))) 7))
+
+        (define almost-factorial
+            (lambda (f)
+                (lambda (n) 
+                    (cond 
+                        ((atom_eq? n 0) 1) 
+                        (else (times n (factorial (minus n 1))))))))
+        
+        (define temp (lambda (n) (display n) n))
+        (define somefact (almost-factorial temp))
+        (display somefact)
+        (display (somefact 4 5 6 7))"#,
     );
 
     let ast = parser.re_program();
@@ -239,7 +278,25 @@ fn ir_instruction_generate_code_in_file(
 },to_reg.virtual_ident)?;
 
         },
-        little_intermediate_representation::LinearInstruction::Cond { condition, branc_if_true } => todo!(),
+        little_intermediate_representation::LinearInstruction::Cond { condition, branc_if_true, cond_name } => {
+            writeln!(file,"    push dword 0 ; LinearInstruction::Cond
+    push dword[{}]
+    call auxilary_is_true_in_cond
+    add esp, 4
+    pop ecx
+
+    cmp ecx, 0
+    je .cond_branch_point_based_on_{}
+\n",condition.virtual_ident,condition.virtual_ident)?;
+            for instr in branc_if_true.program{
+                ir_instruction_generate_code_in_file(file, instr)?;
+            }
+            writeln!(file,"    jmp .{} ; branch of cond was used finishing this cond",cond_name)?;
+            writeln!(file,".cond_branch_point_based_on_{}:",condition.virtual_ident)?;
+        },
+        little_intermediate_representation::LinearInstruction::EndOfCond { cond_name } => {
+            writeln!(file,".{}: ; LinearInstruction::EndOfCond",cond_name)?;
+        },
         little_intermediate_representation::LinearInstruction::Return { value } => {
             writeln!(file,"    mov esi, dword[{}] ; LinearInstruction::Return
     mov [ebp+12], esi\n",value.virtual_ident)?;
@@ -297,7 +354,7 @@ fn static_data_convert_to_handles_in_file(
             let gen_string = static_item.0.to_owned() + "_ll_item";
 
             for item in list.iter().enumerate() {
-                let string_to_use = (static_item.0.to_owned() + "_ll_item_" + &item.0.to_string());
+                let string_to_use = static_item.0.to_owned() + "_ll_item_" + &item.0.to_string();
                 static_data_convert_to_handles_in_file(file, (&string_to_use, item.1))?;
 
                 writeln!(
