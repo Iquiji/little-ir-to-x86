@@ -40,6 +40,7 @@ display_fmt_warn_list_ptr_mem_zero db "DISPAY: WARN list data ptr mem is zero //
 car_fmt_impossible_type: db "CAR: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
 cdr_fmt_impossible_type: db "CDR: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
 cons_fmt_impossible_type: db "CONS: ERROR Impossible value for type: %lu! Address: %#10x", 0Ah, 0h
+plus_fmt_impossible_type: db "PLUS: ERROR Impossible value for type: %lu!", 0Ah, 0h
 
 section .text
 
@@ -420,5 +421,73 @@ primitive_cons_asm_actual:
     add esp,8
 
 .exit:
+    leave
+    ret
+
+primitive_plus_asm_actual:
+    push ebp
+    mov ebp,esp
+
+    mov edx, [ebp+8] ; get arg list pointer
+    mov eax, dword 0 ; adder
+
+.add_loop:
+    mov ebx, [edx + linked_list_node.data]
+
+    cmp ebx, 0
+    je .exit
+
+    cmp dword[ebx + data_ptr.type], 1
+    jne .invalid_type
+
+    mov ecx, [ebx + data_ptr.mem]
+    mov ecx, [ecx]
+    add eax, ecx
+
+    cmp dword[edx + linked_list_node.next], 0
+    je .exit
+
+    mov edx, [edx + linked_list_node.next]
+
+    jmp .add_loop
+
+.invalid_type:
+    push eax
+
+    push dword[ebx + data_ptr.type]
+    push plus_fmt_impossible_type
+    call printf
+    add esp,8
+
+    pop eax
+.exit:
+    push eax
+
+    ; now make new data_ptr
+    push 4 ; alloc number in memory
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new name for our accumulator
+    mov [eax], ebx
+    push eax ; push our pointer to accumulator
+
+    ; now make new data_ptr
+    push data_ptr_size
+    call malloc
+    add esp,4
+
+    test eax,eax
+    jz error_somewhere
+
+    pop ebx ; new name for our accumulator pointer
+    mov [eax + data_ptr.type], dword 1
+    mov [eax + data_ptr.mem], ebx
+
+    mov [ebp+12],eax
+
     leave
     ret

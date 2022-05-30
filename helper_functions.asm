@@ -277,6 +277,12 @@ auxilary_call_function:
     
     ; step one auxilary_clone_scope
     mov eax, [ebp+8]
+
+    cmp dword[eax+data_ptr.type], 6
+    jne error_somewhere
+
+    mov eax, [eax+data_ptr.mem]
+
     mov eax, [eax+init_func_pointer.scope] ; get scope
 
     push 0 ; cloned scope goes here
@@ -297,6 +303,8 @@ auxilary_call_function:
 
 
     mov ecx, [ebp+8]
+    mov ecx, [ecx+data_ptr.mem]
+
     mov ecx, [ecx+init_func_pointer.actual_func_ptr] ; get function pointer
     ; mov ecx, [ecx]
 
@@ -343,6 +351,7 @@ auxilary_clone_scope:
     
     mov edx, [ebp+8] ; original overlord
     push edx
+
     ; step one clone overlord
     push scope_overlord_size
     call malloc ; new mem location in eax
@@ -405,22 +414,25 @@ auxilary_clone_scope:
     pop edx
     mov edx, [edx+scope_overlord.scope_data]
 
-    ; ecx current member to clone from
-    ; edx new member to clone to
+    ; ecx current member to clone to
+    ; edx new member to clone from
 .clone_members:
-    push eax
-    push edx
-
-    push debug_was_here
-    call puts
-    add esp,4
-
-    pop edx
-    pop eax
-
-
     mov eax, [edx+scope_member.data] ; intermediate for copying data location
     mov ebx, [edx+scope_member.identifier] ; intermediate for copying identifier location
+
+    ; push eax
+    ; push ebx
+    ; push ecx
+    ; push edx
+
+    ; push debug_was_here
+    ; call puts
+    ; add esp,4
+
+    ; pop edx
+    ; pop ecx
+    ; pop ebx
+    ; pop eax
 
     mov [ecx+scope_member.data], eax
     mov [ecx+scope_member.identifier], ebx
@@ -438,14 +450,14 @@ auxilary_clone_scope:
 
     test eax,eax
     jz error_somewhere
-    
+
     pop edx
-    mov [edx + scope_member.next], eax ; set next for current member
-
     pop ecx
-    mov ecx, [ecx+scope_member.next] ; go to next
 
-    mov edx, eax
+    mov [ecx + scope_member.next], eax ; set next for current member
+    mov edx, [edx+scope_member.next] ; go to next
+
+    mov ecx, eax ; next to clone to
 
     jmp .clone_members
 
@@ -547,6 +559,18 @@ initialize_function_pointer:
     call auxilary_clone_scope
     add esp,4
 
+    ; push eax
+    ; push ecx
+    ; push edx
+
+    ; push _0_ll_item_0_actual
+    ; call puts
+    ; add esp,4
+
+    ; pop edx
+    ; pop ecx
+    ; pop eax
+
     pop ebx
     mov ecx, ebx ; scope_overlord to use later
 
@@ -610,4 +634,47 @@ initialize_function_pointer:
     mov [ebp+16], eax
 
     leave
+    ret
+
+accept_to_formals:
+    ; assigns variables in lambda call from linked list of identifiers and ll of data
+    ; [ebp+8] data ptr struc with ident list | [ebp+12] call ll
+    push ebp
+    mov ebp, esp
+
+    mov eax, [ebp+8]
+
+    cmp dword[eax + data_ptr.mem], 0
+    je .exit
+
+    mov eax, [eax + data_ptr.mem] ; first linked list item of identifiers
+    mov ebx, [ebp+12] ; first data linked list item
+
+.assign_loop:
+    cmp dword[eax + linked_list_node.data], 0
+    je .exit
+
+    mov ecx, [eax + linked_list_node.data]
+    mov ecx, [ecx + data_ptr.mem]
+
+    push ebx
+    push eax
+
+    push ecx
+    push dword[ebx + linked_list_node.data]
+    push dword[current_scope]
+    call assign_in_scope
+    add esp,12
+
+    pop eax
+    pop ebx
+
+    cmp dword[eax + linked_list_node.next], 0
+    je .exit
+
+    mov eax, [eax + linked_list_node.next]
+    mov ebx, [ebx + linked_list_node.next]
+
+.exit:
+    leave 
     ret

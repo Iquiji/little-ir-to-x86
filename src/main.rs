@@ -11,6 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "cdr".to_owned(),
         "cons".to_owned(),
         "display".to_owned(),
+        "plus".to_owned(),
     ];
 
     println!("Hello, world!");
@@ -23,7 +24,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut parser = Parser::init_with_string(
         r#"
-    (lambda (n) n)"#,
+    (define cust_func (lambda (n) (display n) (cust_func (plus n 1))))
+    (display (cust_func 0))"#,
     );
 
     let ast = parser.re_program();
@@ -76,28 +78,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // but we must put all the primitives together into one as well for the global scope
         writeln!(
             &mut file,
-            "\nprimitive_{}_init_func_ptr_struc:
-        istruc init_func_pointer
-            at init_func_pointer.actual_func_ptr, dd primitive_{}_asm_actual ; actual pointer
-            at init_func_pointer.scope, dd primitive_{}_init_scope ; ptr to scope
-        iend
+            "\nprimitive_{}_ptr_struc:
+    istruc data_ptr
+        at data_ptr.type, dd 6
+        at data_ptr.mem, dd primitive_{}_init_func_ptr_struc
+    iend
+primitive_{}_init_func_ptr_struc:
+    istruc init_func_pointer
+        at init_func_pointer.actual_func_ptr, dd primitive_{}_asm_actual ; actual pointer
+        at init_func_pointer.scope, dd primitive_{}_init_scope ; ptr to scope
+    iend
 primitive_{}_init_scope:
-        istruc scope_overlord
-            at scope_overlord.parent, dd global_scope
-            at scope_overlord.scope_data, dd 0 ; uninitialized
-        iend
+    istruc scope_overlord
+        at scope_overlord.parent, dd global_scope
+        at scope_overlord.scope_data, dd 0 ; uninitialized
+    iend
     
 primitive_{}_global_scope_string_ident:
         db \"{}\", 0h",
-            primitive.1, primitive.1, primitive.1, primitive.1, primitive.1, primitive.1
+        primitive.1, primitive.1, primitive.1, primitive.1, primitive.1, primitive.1, primitive.1, primitive.1
         )?;
 
         writeln!(&mut file,"global_scope_data_ll_{}:
-        istruc scope_member
-            at scope_member.next, dd {} ; none if last
-            at scope_member.identifier, dd primitive_{}_global_scope_string_ident ; ptr to string ident
-            at scope_member.data, dd primitive_{}_init_func_ptr_struc ; ptr to function
-        iend",primitive.0,if primitive.0 == primitives.len()-1{"0".to_owned()}else{"global_scope_data_ll_".to_owned() + &(primitive.0 + 1).to_string()},primitive.1,primitive.1)?;
+    istruc scope_member
+        at scope_member.next, dd {} ; none if last
+        at scope_member.identifier, dd primitive_{}_global_scope_string_ident ; ptr to string ident
+        at scope_member.data, dd primitive_{}_ptr_struc ; ptr to function
+    iend",primitive.0,if primitive.0 == primitives.len()-1{"0".to_owned()}else{"global_scope_data_ll_".to_owned() + &(primitive.0 + 1).to_string()},primitive.1,primitive.1)?;
     }
 
     writeln!(&mut file, "\nsection .bss")?;
@@ -163,7 +170,7 @@ fn ir_instruction_generate_code_in_file(
         little_intermediate_representation::LinearInstruction::AcceptToFormals { static_formals_list } => {
             writeln!(file,"    push dword[ebp+8] ; LinearInstruction::AcceptToFormals
     push {}_data_ptr_struc
-    call new_scope_attached_to_and_replacing_current 
+    call accept_to_formals 
     add esp,8\n",static_formals_list.refname)?;
         },
         little_intermediate_representation::LinearInstruction::NewScopeAttachedToAndReplacingCurrent => {
